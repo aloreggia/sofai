@@ -1,0 +1,1 @@
+from max_ent.algorithms import icrl, rl, gridworld_icrl
