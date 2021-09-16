@@ -2,13 +2,11 @@ import numpy as np
 from max_ent.gridworld.trajectory import Trajectory
 from max_ent.algorithms.gridworld_icrl import Demonstration
 
-import sys, os
-sys.path.append(os.path.abspath(os.path.join('../')))
-
 class MCA:
 
-	def __init__(self, s1, modelSelf, n_tra_threshold=0):
+	def __init__(self, s1, s2, modelSelf, n_tra_threshold=0):
 		self.s1 = s1
+		self.s2 = s2
 		self.modelSelf = modelSelf
 		self.n_tra_threshold = n_tra_threshold
 		self.usage_s1 = 0
@@ -53,6 +51,7 @@ class MCA:
 			if self.modelSelf.getNTrajectories(state) <= self.n_tra_threshold:
 				engageS2 = True
 				self.usage_s2 += 1
+				action = self.s2.policy(self.modelSelf, state)
 
 
 			next_s = range(self.modelSelf.getNStates())

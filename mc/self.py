@@ -8,12 +8,13 @@ class ModelSelf:
 	__std: standard deviations
 	__statistics: for each transition, it keeps track of how many trajectory use that transition
 	"""
-	def __init__(self, grid, demonstrations = []):
+	def __init__(self, grid, constrained, demo):
 		self.statistics = np.ones((9, 9, 8, 9, 9)) * 1e-10
 		self.n = 0
 		self.std = 0
 		self.grid = grid
-		for t in demonstrations:
+		self.constraints = constrained
+		for t in demo.trajectories:
 			self.updateModel(t)
 
 	def getStart(self):
