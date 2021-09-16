@@ -1,13 +1,18 @@
 import numpy as np
 from max_ent.gridworld.trajectory import Trajectory
-from max_ent.algorithms.gridworld_icrl import Demonstrations
+from max_ent.algorithms.gridworld_icrl import Demonstration
+
+import sys, os
+sys.path.append(os.path.abspath(os.path.join('../')))
 
 class MCA:
 
-	def __init__(self, s1, modelSelf, n_tra_threshold=3):
-		self.__s1 = s1
-		self.__modelSelf = modelSelf
-		self.__n_tra_threshold = n_tra_threshold
+	def __init__(self, s1, modelSelf, n_tra_threshold=0):
+		self.s1 = s1
+		self.modelSelf = modelSelf
+		self.n_tra_threshold = n_tra_threshold
+		self.usage_s1 = 0
+		self.usage_s2 = 0
 
 	def generate_trajectory(self, max_len=200):
 		"""
@@ -28,8 +33,9 @@ class MCA:
 			A generated Trajectory instance adhering to the given arguments.
 		"""
 
-		state = self.__modelSelf.getStart()
-		final = self.__modelSelf.getGoal()
+		state = self.modelSelf.getStart()
+		final = self.modelSelf.getGoal()
+		engageS2 = False
 
 		trajectory = []
 		trial = 0
@@ -39,18 +45,26 @@ class MCA:
 					print('Warning: terminated trajectory generation due to unreachable final state.')
 					return Trajectory(trajectory), False    #break
 				trajectory = []
-				state = self.__modelSelf.getStart()
+				state = self.modelSelf.getStart()
 				trial += 1
 
-			action = self.__s1.policy(self.__modelSelf, state)
+			action = self.s1.policy(self.modelSelf, state)
 
-			next_s = range(self.__modelSelf.getNStates())
-			next_p = self.__modelSelf.getWorld().p_transition[state, :, action]
+			if self.modelSelf.getNTrajectories(state) <= self.n_tra_threshold:
+				engageS2 = True
+				self.usage_s2 += 1
+
+
+			next_s = range(self.modelSelf.getNStates())
+			next_p = self.modelSelf.getWorld().p_transition[state, :, action]
 
 			next_state = np.random.choice(next_s, p=next_p)
 
 			trajectory.append((state, action, next_state))
 			state = next_state
+
+			if not engageS2:
+				self.usage_s1 += 1
 
 		return Trajectory(trajectory), True
 
@@ -83,9 +97,9 @@ class MCA:
 			A generator expression generating `n` `Trajectory` instances
 			adhering to the given arguments.
 		"""
-		world = self.__modelSelf.getWorld()
-		start = self.__modelSelf.getStart() 
-		final = self.__modelSelf.getGoal()
+		world = self.modelSelf.getWorld()
+		start = self.modelSelf.getStart() 
+		final = self.modelSelf.getGoal()
 
 		start_states = np.atleast_1d(start)
 
@@ -101,6 +115,7 @@ class MCA:
 		for _ in range(n):
 			tr, reachable = _generate_one()
 			if reachable or not discard_not_feasable:
+				self.modelSelf.updateModel(tr)
 				list_tr.append(tr)
 		
-		return Demonstration(list_tr, self.__s1.policy)
+		return Demonstration(list_tr, self.s1.policy)
