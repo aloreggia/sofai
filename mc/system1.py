@@ -9,6 +9,10 @@ class System1Solver:
 		#per ogni azione computa la probabilità che appartenga a una traiettoria positiva
 		#argmax prob dell'azione 
 
-		action = np.argmax([modelSelf.getReward(state, a)[0]*modelSelf.getReward(state, a)[1] for a in range(8)])
+		list_Action = [modelSelf.getReward(state, a)[0]*modelSelf.getReward(state, a)[1] for a in range(8)]
+		list_Confidence = [modelSelf.getReward(state, a)[1] for a in range(8)]
 
-		return action
+		action = np.argmax(list_Action)
+		confidence = list_Confidence[action]
+
+		return action, confidence
