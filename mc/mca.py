@@ -3,17 +3,27 @@ from max_ent.gridworld.trajectory import Trajectory
 from max_ent.algorithms.gridworld_icrl import Demonstration
 import time
 from mc.self import *
+from mc.system1 import *
+from mc.system2 import *
+
 from random import random
 
 class MCA:
 
-	def __init__(self, s1, s2, modelSelf, threshold1=0, threshold2 = 0.5, \
+	def __init__(self, n=None, c=None, demo=None, s1=None, s2=None, modelSelf=None, threshold1=200, threshold2 = 0.8, \
 				threshold3 = 0.5, initial_time=100, threshold4 = 0, \
-				threshold5 = 0, threshold6 = 1, threshold7 = 0.5, only_s1 = False, only_s2 = False):
+				threshold5 = 0, threshold6 = 1, threshold7 = 0.5, only_s1 = False, only_s2 = False,):
 		assert(only_s1 != only_s2 or (not only_s1 and not only_s2 ))
-		self.s1 = s1
-		self.s2 = s2
-		self.modelSelf = modelSelf
+
+		if s1 != None: self.s1 = s1
+		else: self.s1 = System1Solver()
+
+		if s2 != None: self.s2 = s2
+		else: self.s2 = System2Solver()
+
+		if modelSelf!= None: self.modelSelf = modelSelf
+		else: self.modelSelf = ModelSelf(n, c, demo)
+
 		self.threshold1 = threshold1
 		self.threshold2 = threshold2
 		self.threshold3 = threshold3
@@ -26,11 +36,28 @@ class MCA:
 		self.time_usage_s2 = 0
 		self.w=[1.0, 0.0]
 		self.trajectory_stat = []
+		self.time_stat = []
+		self.violations = []
+		self.action_reward = []
 		self.time_left = initial_time * 1000 #change sec in millisec
 		self.only_s1 = only_s1
 		self.only_s2 = only_s2
 
-	def generate_trajectory(self, max_len=200):
+	def getStatistics(self, verbose=False):
+		'''
+		Return the average amount of times that s1 and s2 are used per-trajectory
+		'''
+		percentage_s1 = 0.0
+		percentage_s2 = 0.0
+
+		for trajectory, time_spent in zip(self.trajectory_stat, self.time_stat):
+			percentage_s1 += np.sum(trajectory)/len(trajectory)
+			percentage_s2 += (len(trajectory) - np.sum(trajectory))/len(trajectory)
+
+		if verbose: print(f"{percentage_s1/len(self.trajectory_stat):.4f}, {percentage_s2/len(self.trajectory_stat):.4f}")
+		return percentage_s1/len(self.trajectory_stat), percentage_s2/len(self.trajectory_stat)
+
+	def generate_trajectory(self, max_length = 200):
 		"""
 		Generate a single trajectory.
 		Args:
@@ -53,20 +80,30 @@ class MCA:
 		final = self.modelSelf.getGoal()
 
 		trajectory = []
+		trajectory_builder = []
+		time_builder = []
+		viol = []
+		act_reward =[]
+		
 		current_reward = 0 
 		trial = 0
 		#each component corresponds to a transition in the trajectory
 		# 0 means action computed with s2
 		# 1 means action computed with s1
-		trajectory_builder = []
+		
 		while state != final:
 			s1_use = 1
 			engageS2 = False
-			if len(trajectory) > max_len:  # Reset and create a new trajectory
+			if len(trajectory) > max_length:  # Reset and create a new trajectory
 				if trial >= 5:
 					print('Warning: terminated trajectory generation due to unreachable final state.')
-					return Trajectory(trajectory), False, trajectory_builder    #break
+					return Trajectory(trajectory), False, trajectory_builder, time_builder, act_reward    #break
 				trajectory = []
+				trajectory_builder = []
+				time_builder = []
+				viol = []
+				act_reward =[]
+				current_reward = 0
 				state = self.modelSelf.getStart()
 				trial += 1
 
@@ -76,6 +113,7 @@ class MCA:
 				action, confidence = self.s1.policy(self.modelSelf, state)
 				time_exp = int(round(time.time() * 1000)) - time_exp
 			else:
+				engageS2 = True
 				confidence = 1
 				action = 0
 
@@ -84,7 +122,7 @@ class MCA:
 			#check whether the system has enough time to run system 2
 			if not self.only_s1:
 
-				#adjust w based on how the agent behaves so far
+				#set w based on the type
 				if self.threshold5 == 0: 
 						w = [1, 0]
 				elif self.threshold5 == 1: 
@@ -92,89 +130,80 @@ class MCA:
 				elif self.threshold5 == 2:
 						w = [0.5, 0.5]
 
-				if self.only_s2: 
+				if not self.only_s2 and ((self.modelSelf.getNTrajectories(state) <= self.threshold1) or (current_reward / expected_avg_reward < self.threshold2) or (confidence <= self.threshold3)):
+					engageS2 = False
+					
+					if self.modelSelf.getNTrajectoryStateS2(state)< self.threshold6:
+						#engage S2 at random
+						if random() < self.threshold7: engageS2 = True
+					else:
+						min_rew_s2, max_rew_s2 = self.modelSelf.getMinMaxPartialReward(state, s2 = True)
+						#print(f"min_rew_s2, max_rew_s2 {min_rew_s2, max_rew_s2}")
+						min_rew, max_rew = self.modelSelf.getMinMaxPartialReward(state)
+						min_rew = np.abs(min_rew_s2 - max_rew)
+						max_rew = np.abs(max_rew_s2 - min_rew)
+						max_diff_rew = max(min_rew, max_rew)
 
-					engageS2 = True
+						expected_rew_move_s1 = self.modelSelf.getReward(state, action)[0]
+						expected_rew_move_s2 = self.modelSelf.getRewardS2(state)
+						delta_reward = (expected_rew_move_s2 - expected_rew_move_s1) / max_diff_rew
+
+						#compute the average time taken by S2 to compute a move
+						expected_time_s2 = 1 #should de derived from past experience
+						if self.usage_s2 != 0:
+							expected_time_s2 = (self.time_usage_s2 / self.usage_s2) #compute avg S2 time
+
+						expected_cost_s2 = expected_time_s2 / self.time_left
+						#print(f"{expected_cost_s2} and {expected_rew_move_s2} - {expected_rew_move_s1} / {max_diff_rew} / expected_cost_s2 {expected_cost_s2}")
+						if (expected_cost_s2 <= 1 and (delta_reward / expected_cost_s2) >= self.threshold4):
+							engageS2 = True
+							#print("Engage S2")
+
+				#if self.only_s2: print(f"Engage S2: {engageS2}")
+				if engageS2:
+					if self.threshold5 == 0: 
+						x = 0.0
+						if expected_avg_reward >= current_reward:
+							min_rew, max_rew = self.modelSelf.getMinMaxPartialReward(state)
+							if min_rew != None and max_rew != None:
+								min_rew = np.abs(current_reward - min_rew)
+								max_rew = np.abs(current_reward - max_rew)
+								max_diff_rew = max(min_rew, max_rew)
+								x = np.abs(current_reward - expected_avg_reward) / max_diff_rew
+						x = min(1.0,x)
+						w = [1-x, x]
+					elif self.threshold5 == 1: 
+						x = 0.0
+						expected_avg_length = self.modelSelf.getAvgPartialLength(state) 
+						#print(f"{expected_avg_length}")
+						current_length = len(trajectory_builder)
+						if expected_avg_length >= current_length:
+							min_len, max_len = self.modelSelf.getMinMaxPartialLength(state)
+							if min_len != None and max_len != None:
+								min_len = np.abs(current_length - min_len)
+								max_len = np.abs(current_length - max_len)
+								max_diff_len = max(min_len, max_len)
+								x = np.abs(current_length - expected_avg_length) / max_diff_len
+						x = min(1.0,x)
+						w = [x, 1-x]
+					elif self.threshold5 == 2:
+						x = 0.0
+						min_rew, max_rew = self.modelSelf.getMinMaxPartialReward(state)
+						if min_rew != None and max_rew != None:
+							min_rew = np.abs(current_reward - min_rew)
+							max_rew = np.abs(current_reward - max_rew)
+							max_diff_rew = max(min_rew, max_rew)
+							x = (current_reward - expected_avg_reward) / max_diff_rew
+							x = min(1.0,x)
+							x = max(-1.0, x)
+						if x>=0: w = np.array([1.0 +x, 1.0 -x])/2
+						else: w = np.array([1.0 +x, 1.0 -x])/2
+						#print(f"{w} {x}")
+
 					time_exp = int(round(time.time() * 1000))
-					#print(f"{w}")
+					#print(f"{w} {x}")
 					action = self.s2.policy(self.modelSelf, state, w)
 					time_exp = int(round(time.time() * 1000)) - time_exp
-
-				else:# self.time_left >= self.threshold4:
-					# Check second condition: if we should consider action then 
-					# expected_reward = current_reward + exp_reward(action) but then what is the comparison with?
-					# else if action is not involved then this is not a condition about s1 or s2 based on action	
-					if self.only_s2 or (self.modelSelf.getNTrajectories(state) <= self.threshold1) or (current_reward / expected_avg_reward < self.threshold2) or (confidence <= self.threshold3):
-						engageS2 = False
-						#print("Try to engage S2")
-
-						if self.modelSelf.getNTrajectoryStateS2(state)< self.threshold6:
-							#print("Engage S2 with random chance")
-							if random() < self.threshold7:
-								engageS2 = True
-								time_exp = int(round(time.time() * 1000))
-								#print(f"{w}")
-								action = self.s2.policy(self.modelSelf, state, w)
-								time_exp = int(round(time.time() * 1000)) - time_exp
-						else:
-							min_rew_s2, max_rew_s2 = self.modelSelf.getMinMaxPartialReward(state, s2 = True)
-							#print(f"min_rew_s2, max_rew_s2 {min_rew_s2, max_rew_s2}")
-							min_rew, max_rew = self.modelSelf.getMinMaxPartialReward(state)
-							min_rew = np.abs(min_rew_s2 - max_rew)
-							max_rew = np.abs(max_rew_s2 - min_rew)
-							max_diff_rew = max(min_rew, max_rew)
-
-							expected_rew_move_s1 = self.modelSelf.getReward(state, action)[0]
-							expected_rew_move_s2 = self.modelSelf.getRewardS2(state)
-							delta_reward = (expected_rew_move_s2 - expected_rew_move_s1) / max_diff_rew
-
-							expected_time_s2 = 1 #should de derived from past experience
-							if self.usage_s2 != 0:
-								expected_time_s2 = (self.time_usage_s2 / self.usage_s2) #compute avg S2 time
-
-							expected_cost_s2 = expected_time_s2 / self.time_left
-							#print(f"{expected_cost_s2} and {expected_rew_move_s2} - {expected_rew_move_s1} / {max_diff_rew} / expected_cost_s2 {expected_cost_s2}")
-							if self.only_s2 or (expected_cost_s2 <= 1 and (delta_reward / expected_cost_s2) > self.threshold4):
-								engageS2 = True
-								#print("Engage S2")
-								if self.threshold5 == 0: 
-									x = 0.0
-									if expected_avg_reward >= current_reward:
-										min_rew, max_rew = self.modelSelf.getMinMaxPartialReward(state)
-										min_rew = np.abs(current_reward - min_rew)
-										max_rew = np.abs(current_reward - max_rew)
-										max_diff_rew = max(min_rew, max_rew)
-										x = np.abs(current_reward - expected_avg_reward) / max_diff_rew
-									x = min(1.0,x)
-									w = [1-x, x]
-								elif self.threshold5 == 1: 
-									x = 0.0
-									expected_avg_length = self.modelSelf.getAvgPartialLength(state) 
-									print(f"{expected_avg_length}")
-									current_length = len(trajectory_builder)
-									if expected_avg_length >= current_length:
-										min_len, max_len = self.modelSelf.getMinMaxPartialLength(state)
-										min_len = np.abs(current_length - min_len)
-										max_len = np.abs(current_length - max_len)
-										max_diff_len = max(min_len, max_len)
-										x = np.abs(current_length - expected_avg_length) / max_diff_len
-									x = min(1.0,x)
-									w = [x, 1-x]
-								elif self.threshold5 == 2:
-									min_rew, max_rew = self.modelSelf.getMinMaxPartialReward(state)
-									min_rew = np.abs(current_reward - min_rew)
-									max_rew = np.abs(current_reward - max_rew)
-									max_diff_rew = max(min_rew, max_rew)
-									x = (current_reward - expected_avg_reward) / max_diff_rew
-									x = min(1.0,x)
-									x = max(-1.0, x)
-									if x>=0: w = np.array([1.0 +x, 1.0 -x])/2
-									else: w = np.array([1.0 +x, 1.0 -x])/2
-									#print(f"{w} {x}")
-
-								time_exp = int(round(time.time() * 1000))
-								action = self.s2.policy(self.modelSelf, state, w)
-								time_exp = int(round(time.time() * 1000)) - time_exp
 
 
 			next_s = range(self.modelSelf.getNStates())
@@ -185,6 +214,7 @@ class MCA:
 			transition = (state, action, next_state)
 			trajectory.append(transition)
 			current_reward += self.modelSelf.constraints.reward[transition]
+			act_reward.append(self.modelSelf.constraints.reward[transition])
 
 			state = next_state
 
@@ -198,9 +228,11 @@ class MCA:
 				self.time_left -= time_exp #reduce the remaining time
 			
 			trajectory_builder.append(s1_use)
+			time_builder.append(time_exp)
+
 
 		
-		return Trajectory(trajectory), True, trajectory_builder
+		return Trajectory(trajectory), True, trajectory_builder, time_builder, act_reward
 
 
 	def generate_trajectories(self, n, discard_not_feasable=False):
@@ -247,10 +279,12 @@ class MCA:
 
 		list_tr = []
 		for _ in range(n):
-			tr, reachable, temp_stats = _generate_one()
+			tr, reachable, temp_stats, temp_time_stat, temp_act_reward = _generate_one()
 			if reachable or not discard_not_feasable:
 				self.modelSelf.updateModel(tr, temp_stats)
 				list_tr.append(tr)
 				self.trajectory_stat.append(temp_stats)
+				self.time_stat.append(temp_time_stat)
+				self.action_reward.append(temp_act_reward)
 		
 		return Demonstration(list_tr, self.s1.policy)

@@ -103,7 +103,7 @@ def js_divergence(p, q):
 # add nominal world -> compute the average nominal reward for the constrained trajectory
 
 
-def count_states(trajectories, grid, nominal, constraints):
+def count_states(trajectories, grid, nominal, constraints, bootstrap = 0):
     #grid = world.mdp
     count_matrix = np.ones((9, 9, 8, 9, 9)) * 1e-10
     avg_length = 0.0
@@ -114,27 +114,30 @@ def count_states(trajectories, grid, nominal, constraints):
     avg_ca = 0.0
     avg_cb = 0.0
     avg_cg = 0.0
-    n = len(trajectories)
+    n = len(trajectories) -  bootstrap
+    i=0
     for trajectory in trajectories:
-        avg_length += len(trajectory.transitions())
-        # print(trajectory)
-        # print(list(trajectory.transitions()))
-        reward, reward_n, count_cs, count_ca, count_cb, count_cg = total_reward(
-            trajectory, grid, nominal, constraints)
-        avg_reward += reward
-        avg_reward_n += reward_n
-        avg_violated += (count_cs + count_ca + count_cb + count_cg)
-        avg_cs += count_cs
-        avg_ca += count_ca
-        avg_cb += count_cb
-        avg_cg += count_cg
-        for transition in trajectory.transitions():
-            # print(state)
-            state_s = transition[0]
-            action = transition[1]
-            state_t = transition[2]
-            count_matrix[grid.world.state_index_to_point(
-                state_s)][action][grid.world.state_index_to_point(state_t)] += 1
+        i += 1
+        if i > bootstrap:
+            avg_length += len(trajectory.transitions())
+            # print(trajectory)
+            # print(list(trajectory.transitions()))
+            reward, reward_n, count_cs, count_ca, count_cb, count_cg = total_reward(
+                trajectory, grid, nominal, constraints)
+            avg_reward += reward
+            avg_reward_n += reward_n
+            avg_violated += (count_cs + count_ca + count_cb + count_cg)
+            avg_cs += count_cs
+            avg_ca += count_ca
+            avg_cb += count_cb
+            avg_cg += count_cg
+            for transition in trajectory.transitions():
+                # print(state)
+                state_s = transition[0]
+                action = transition[1]
+                state_t = transition[2]
+                count_matrix[grid.world.state_index_to_point(
+                    state_s)][action][grid.world.state_index_to_point(state_t)] += 1
 
     return count_matrix / np.sum(count_matrix), avg_length / n, avg_reward / n, avg_reward_n / n, avg_violated/n, (avg_cs/n, avg_ca/n, avg_cb/n, avg_cg/n)
 
