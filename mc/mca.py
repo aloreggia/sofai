@@ -12,7 +12,7 @@ class MCA:
 
 	def __init__(self, n=None, c=None, demo=None, s1=None, s2=None, modelSelf=None, threshold1=200, threshold2 = 0.8, \
 				threshold3 = 0.5, initial_time=100, threshold4 = 0, \
-				threshold5 = 0, threshold6 = 1, threshold7 = 0.5, only_s1 = False, only_s2 = False,):
+				threshold5 = 0, threshold6 = 1, threshold7 = 0.5, only_s1 = False, only_s2 = False, mixed= False):
 		assert(only_s1 != only_s2 or (not only_s1 and not only_s2 ))
 
 		if s1 != None: self.s1 = s1
@@ -34,14 +34,27 @@ class MCA:
 		self.usage_s1 = 0
 		self.usage_s2 = 0
 		self.time_usage_s2 = 0
-		self.w=[1.0, 0.0]
+		#set w based on the type
+		if self.threshold5 == 0: 
+			self.w = [1, 0]
+		elif self.threshold5 == 1: 
+			self.w = [0, 1]
+		elif self.threshold5 == 2:
+			self.w = [0.5, 0.5]
+
 		self.trajectory_stat = []
 		self.time_stat = []
 		self.violations = []
 		self.action_reward = []
+		self.fixed_time_left = initial_time * 1000 #change sec in millisec
 		self.time_left = initial_time * 1000 #change sec in millisec
 		self.only_s1 = only_s1
 		self.only_s2 = only_s2
+
+		self.mixed = mixed
+		if self.mixed: 
+			self.only_s1 = False
+			self.only_s2 = True
 
 	def getStatistics(self, verbose=False):
 		'''
@@ -84,6 +97,7 @@ class MCA:
 		time_builder = []
 		viol = []
 		act_reward =[]
+		self.time_left = self.fixed_time_left
 		
 		current_reward = 0 
 		trial = 0
@@ -106,6 +120,7 @@ class MCA:
 				current_reward = 0
 				state = self.modelSelf.getStart()
 				trial += 1
+				self.time_left = self.fixed_time_left
 
 			#S1 computes an action based on previous experience
 			if not self.only_s2:
@@ -123,12 +138,7 @@ class MCA:
 			if not self.only_s1:
 
 				#set w based on the type
-				if self.threshold5 == 0: 
-						w = [1, 0]
-				elif self.threshold5 == 1: 
-						w = [0, 1]
-				elif self.threshold5 == 2:
-						w = [0.5, 0.5]
+				w = self.w
 
 				if not self.only_s2 and ((self.modelSelf.getNTrajectories(state) <= self.threshold1) or (current_reward / expected_avg_reward < self.threshold2) or (confidence <= self.threshold3)):
 					engageS2 = False
@@ -279,6 +289,10 @@ class MCA:
 
 		list_tr = []
 		for _ in range(n):
+			if self.mixed and len(self.trajectory_stat)>=200:
+				self.only_s1 = True
+				self.only_s2 = False	
+
 			tr, reachable, temp_stats, temp_time_stat, temp_act_reward = _generate_one()
 			if reachable or not discard_not_feasable:
 				self.modelSelf.updateModel(tr, temp_stats)

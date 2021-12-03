@@ -35,7 +35,7 @@ class System2Solver:
 
 		return action
 
-def mdft_policy_adapter(nominal_q, constrained_q, w=None, pref_t = 10):
+def mdft_policy_adapter(nominal_q, constrained_q, w=None, pref_t = 20):
 	def policy(state):
 		r = nominal_q[state]
 		c = constrained_q[state]

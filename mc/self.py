@@ -24,6 +24,7 @@ class ModelSelf:
 		self.part_reward_s2 = np.zeros((9, 9)) 
 		self.part_reward_state_action = np.zeros((9, 9, 8)) 
 		self.prob = np.ndarray(shape=(9,9,8), dtype=object)
+		self.prob_remaining = np.ndarray(shape=(9,9,8), dtype=object)
 		self.prob_s2 = np.ndarray(shape=(9,9,8), dtype=object)
 		self.n = 0
 		self.std = 0
@@ -53,6 +54,18 @@ class ModelSelf:
 		
 		return reward
 
+	def getPartialRemainingReward(self, trajectory, transition):
+		reward = 0.0
+		find = False
+		for state in trajectory.transitions():
+			if (state == transition):
+				find=True
+
+			if find:
+				reward += self.constraints.reward[state]
+		
+		return reward
+
 	def updateModel(self, trajectory, traj_builders=None):
 		"""
 		Given a new trajectory, update the model of self.
@@ -72,6 +85,8 @@ class ModelSelf:
 
 		i = 0
 		for transition in trajectory.transitions():
+
+			total_reward = self.getPartialRemainingReward(trajectory, transition)
 			# print(state)
 			state_s = transition[0]
 			action = transition[1]
