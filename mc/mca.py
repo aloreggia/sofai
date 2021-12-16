@@ -24,6 +24,7 @@ class MCA:
 		if modelSelf!= None: self.modelSelf = modelSelf
 		else: self.modelSelf = ModelSelf(n, c, demo)
 
+		print(f"threshold1: {threshold1}")
 		self.threshold1 = threshold1
 		self.threshold2 = threshold2
 		self.threshold3 = threshold3
@@ -43,6 +44,9 @@ class MCA:
 			self.w = [0.5, 0.5]
 
 		self.trajectory_stat = []
+		self.thresholds_stat = []
+		self.thresholds_1h = []
+
 		self.time_stat = []
 		self.violations = []
 		self.action_reward = []
@@ -97,6 +101,7 @@ class MCA:
 		time_builder = []
 		viol = []
 		act_reward =[]
+		temp_thresholds_stat = []
 		self.time_left = self.fixed_time_left
 		
 		current_reward = 0 
@@ -108,6 +113,7 @@ class MCA:
 		while state != final:
 			s1_use = 1
 			engageS2 = False
+			action_thresholds = np.zeros(7)
 			if len(trajectory) > max_length:  # Reset and create a new trajectory
 				if trial >= 5:
 					print('Warning: terminated trajectory generation due to unreachable final state.')
@@ -120,6 +126,7 @@ class MCA:
 				current_reward = 0
 				state = self.modelSelf.getStart()
 				trial += 1
+				temp_thresholds_stat = []
 				self.time_left = self.fixed_time_left
 
 			#S1 computes an action based on previous experience
@@ -140,12 +147,21 @@ class MCA:
 				#set w based on the type
 				w = self.w
 
+				action_thresholds[0] = self.modelSelf.getNTrajectories(state)
+				action_thresholds[1] = current_reward / expected_avg_reward
+				action_thresholds[2] = confidence
+
 				if not self.only_s2 and ((self.modelSelf.getNTrajectories(state) <= self.threshold1) or (current_reward / expected_avg_reward < self.threshold2) or (confidence <= self.threshold3)):
 					engageS2 = False
+
+					action_thresholds[5] = self.modelSelf.getNTrajectoryStateS2(state)
 					
 					if self.modelSelf.getNTrajectoryStateS2(state)< self.threshold6:
 						#engage S2 at random
-						if random() < self.threshold7: engageS2 = True
+						random_chance = random()
+						action_thresholds[6] = random_chance
+
+						if  random_chance < self.threshold7: engageS2 = True
 					else:
 						min_rew_s2, max_rew_s2 = self.modelSelf.getMinMaxPartialReward(state, s2 = True)
 						#print(f"min_rew_s2, max_rew_s2 {min_rew_s2, max_rew_s2}")
@@ -165,6 +181,8 @@ class MCA:
 
 						expected_cost_s2 = expected_time_s2 / self.time_left
 						#print(f"{expected_cost_s2} and {expected_rew_move_s2} - {expected_rew_move_s1} / {max_diff_rew} / expected_cost_s2 {expected_cost_s2}")
+						action_thresholds[3] = (delta_reward / expected_cost_s2)
+						action_thresholds[4] = expected_cost_s2
 						if (expected_cost_s2 <= 1 and (delta_reward / expected_cost_s2) >= self.threshold4):
 							engageS2 = True
 							#print("Engage S2")
@@ -225,6 +243,7 @@ class MCA:
 			trajectory.append(transition)
 			current_reward += self.modelSelf.constraints.reward[transition]
 			act_reward.append(self.modelSelf.constraints.reward[transition])
+			temp_thresholds_stat.append(action_thresholds)
 
 			state = next_state
 
@@ -242,7 +261,7 @@ class MCA:
 
 
 		
-		return Trajectory(trajectory), True, trajectory_builder, time_builder, act_reward
+		return Trajectory(trajectory), True, trajectory_builder, time_builder, act_reward, temp_thresholds_stat
 
 
 	def generate_trajectories(self, n, discard_not_feasable=False):
@@ -293,12 +312,13 @@ class MCA:
 				self.only_s1 = True
 				self.only_s2 = False	
 
-			tr, reachable, temp_stats, temp_time_stat, temp_act_reward = _generate_one()
+			tr, reachable, temp_stats, temp_time_stat, temp_act_reward, temp_thresholds_stat = _generate_one()
 			if reachable or not discard_not_feasable:
 				self.modelSelf.updateModel(tr, temp_stats)
 				list_tr.append(tr)
 				self.trajectory_stat.append(temp_stats)
 				self.time_stat.append(temp_time_stat)
 				self.action_reward.append(temp_act_reward)
+				self.thresholds_stat.append(temp_thresholds_stat)
 		
 		return Demonstration(list_tr, self.s1.policy)
