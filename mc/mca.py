@@ -202,6 +202,7 @@ class MCA:
 
 				#if self.only_s2: print(f"Engage S2: {engageS2}")
 				if engageS2:
+					action_thresholds_mask[4] = 1  					
 					if self.threshold5 == 0: 
 						x = 0.0
 						if expected_avg_reward >= current_reward:
