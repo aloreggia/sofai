@@ -21,7 +21,7 @@ Config = namedtuple('Config', ['mdp', 'state_penalties',
 
 
 def plot_world(title, mdp, state_rewards, action_rewards, color_rewards,
-               demo, blue_states, green_states, vmin=None, vmax=None):
+               demo, blue_states, green_states, red_states=[], vmin=None, vmax=None):
 
     cm = plt.cm.afmhot
     fsize = (4.5, 3)
@@ -29,14 +29,20 @@ def plot_world(title, mdp, state_rewards, action_rewards, color_rewards,
     spec = gridspec.GridSpec(ncols=12, nrows=2, figure=fig)
     colored = [(s, 'blue') for s in blue_states]
     colored += [(s, 'green')for s in green_states]
+    #colored += [(s, 'red')for s in red_states]
 
     ax = fig.add_subplot(spec[:, :8])
     p = P.plot_state_values(ax, mdp.world, state_rewards, mdp.start,
                             mdp.terminal, colored, vmin=vmin, vmax=vmax, cmap=cm)
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes("left", size="5%", pad=0.1)
-    cb = plt.colorbar(p, cax=cax)
-    cb.ax.yaxis.set_ticks_position("left")
+    #cax = divider.append_axes("left", size="5%", pad=0.1)
+    #cb = plt.colorbar(p, cax=cax)
+    #cb.ax.yaxis.set_ticks_position("left")
+    
+    for s in red_states:
+        coord = mdp.world.state_index_to_point(s)
+        circle1 = plt.Circle(coord, 0.2, color='r')
+        ax.add_patch(circle1)
 
     for t in demo.trajectories:
         P.plot_trajectory(ax, mdp.world, t, lw=4,
