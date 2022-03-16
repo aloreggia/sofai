@@ -30,6 +30,8 @@ def create_world(title, blue, green, cs=[], ca=[], cc=[], start=0, goal=8, vmin=
                  vmax=10, check=False, draw=True, n_trajectories=200):
     n_cfg = G.config_world(blue, green, cs, ca, cc, goal, start=start)
     n = n_cfg.mdp
+    
+    print(n.world.p_transition[0,0,:])
 
     # Generate demonstrations and plot the world
     if check:
@@ -103,9 +105,13 @@ def js_divergence(p, q):
 # add nominal world -> compute the average nominal reward for the constrained trajectory
 
 
-def count_states(trajectories, grid, nominal, constraints, bootstrap = 0):
+def count_states(trajectories, grid, nominal, constraints, bootstrap = 0, normalize = True, avoid_impossible = False):
     #grid = world.mdp
     count_matrix = np.ones((9, 9, 8, 9, 9)) * 1e-10
+    #count_matrix = np.zeros((9, 9, 8, 9, 9))
+    impossible_moves = 0
+    total_transitions = 0
+    if not normalize: count_matrix = np.zeros((9, 9, 8, 9, 9))
     avg_length = 0.0
     avg_reward = 0.0
     avg_reward_n = 0.0
@@ -132,14 +138,24 @@ def count_states(trajectories, grid, nominal, constraints, bootstrap = 0):
             avg_cb += count_cb
             avg_cg += count_cg
             for transition in trajectory.transitions():
+                total_transitions += 1
                 # print(state)
                 state_s = transition[0]
                 action = transition[1]
                 state_t = transition[2]
+                increment = 1
+                if (avoid_impossible and state_s == state_t): 
+                    increment = 0
+                    impossible_moves += 1
                 count_matrix[grid.world.state_index_to_point(
-                    state_s)][action][grid.world.state_index_to_point(state_t)] += 1
+                    state_s)][action][grid.world.state_index_to_point(state_t)] += increment
 
-    return count_matrix / np.sum(count_matrix), avg_length / n, avg_reward / n, avg_reward_n / n, avg_violated/n, (avg_cs/n, avg_ca/n, avg_cb/n, avg_cg/n)
+    if avoid_impossible:
+        print(f"Imp. moves/Tot. Trans.: {impossible_moves}/ {total_transitions}")
+    if normalize:
+        return count_matrix / np.sum(count_matrix), avg_length / n, avg_reward / n, avg_reward_n / n, avg_violated/n, (avg_cs/n, avg_ca/n, avg_cb/n, avg_cg/n)
+    else:
+        return count_matrix, avg_length / n, avg_reward / n, avg_reward_n / n, avg_violated/n, (avg_cs/n, avg_ca/n, avg_cb/n, avg_cg/n)
 
 
 # check for distance between start and terminal states

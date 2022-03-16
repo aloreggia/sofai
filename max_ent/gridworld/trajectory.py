@@ -7,7 +7,7 @@ thereof.
 
 import numpy as np
 from itertools import chain
-from mdft_nn.mdft import MDFT, get_time_based_dft_dist
+from mdft_nn.mdft import MDFT, get_time_based_dft_dist, get_preference_based_dft_dist
 from mdft_nn.helpers.distances import hotaling_S
 
 
@@ -187,6 +187,8 @@ def mdft_policy_adapter(nominal_q, constrained_q, w=None, delib_t=100):
         p0 = np.zeros((M.shape[0], 1))
         mdft = MDFT(M, S, w, p0)
         dist = get_time_based_dft_dist(mdft, 1, delib_t)
+        #dist = get_preference_based_dft_dist(mdft, 1, delib_t)
+        #print(dist)
         return np.argmax(dist)
 
     return policy

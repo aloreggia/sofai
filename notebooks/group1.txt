@@ -1,0 +1,1273 @@
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 2: (10, 0) 
+Road 3: (52, 0) 
+Road 6: (17, 100) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (5, 0) 
+Road 2: (8, 2) 
+Road 3: (53, 96) 
+Road 5: (8, 0) 
+Road 6: (13, 1) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (6, 0) 
+Road 2: (6, 14) 
+Road 3: (54, 58) 
+Road 5: (10, 0) 
+Road 6: (10, 1) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (8, 29) 
+Road 2: (5, 34) 
+Road 3: (53, 10) 
+Road 5: (14, 0) 
+Road 6: (7, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (10, 11) 
+Road 2: (4, 58) 
+Road 3: (50, 0) 
+Road 5: (17, 0) 
+Road 6: (5, 6) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (14, 5) 
+Road 2: (4, 58) 
+Road 3: (45, 8) 
+Road 5: (20, 0) 
+Road 6: (3, 8) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (18, 6) 
+Road 2: (3, 39) 
+Road 3: (39, 15) 
+Road 5: (22, 0) 
+Road 6: (3, 9) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (22, 13) 
+Road 2: (4, 27) 
+Road 3: (33, 23) 
+Road 5: (22, 0) 
+Road 6: (2, 6) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (23, 19) 
+Road 3: (29, 24) 
+Road 5: (18, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 2: (8, 4) 
+Road 3: (59, 0) 
+Road 4: (0, 0) 
+Road 6: (22, 95) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (3, 0) 
+Road 2: (6, 0) 
+Road 3: (63, 99) 
+Road 4: (0, 0) 
+Road 5: (8, 0) 
+Road 6: (17, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (4, 96) 
+Road 2: (4, 0) 
+Road 3: (65, 0) 
+Road 4: (0, 2) 
+Road 5: (12, 0) 
+Road 6: (11, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (6, 69) 
+Road 2: (3, 0) 
+Road 3: (63, 0) 
+Road 4: (0, 17) 
+Road 5: (17, 0) 
+Road 6: (7, 7) 
+Road 7: (0, 0) 
+Road 8: (0, 6) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (9, 6) 
+Road 2: (2, 33) 
+Road 3: (58, 23) 
+Road 4: (0, 21) 
+Road 5: (23, 0) 
+Road 6: (5, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 15) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (12, 0) 
+Road 2: (2, 50) 
+Road 3: (50, 0) 
+Road 4: (1, 21) 
+Road 5: (29, 0) 
+Road 6: (3, 10) 
+Road 7: (0, 0) 
+Road 8: (0, 17) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (17, 3) 
+Road 2: (2, 40) 
+Road 3: (42, 13) 
+Road 4: (1, 23) 
+Road 5: (32, 0) 
+Road 6: (2, 10) 
+Road 7: (0, 0) 
+Road 8: (0, 8) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (23, 8) 
+Road 2: (2, 28) 
+Road 3: (35, 26) 
+Road 4: (2, 22) 
+Road 5: (32, 0) 
+Road 6: (2, 8) 
+Road 7: (1, 0) 
+Road 8: (0, 5) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (25, 17) 
+Road 3: (30, 29) 
+Road 4: (3, 20) 
+Road 5: (25, 0) 
+Road 7: (1, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 2: (7, 0) 
+Road 3: (59, 93) 
+Road 4: (0, 0) 
+Road 6: (26, 6) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (2, 0) 
+Road 2: (4, 0) 
+Road 3: (65, 99) 
+Road 4: (0, 0) 
+Road 5: (7, 0) 
+Road 6: (19, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (3, 68) 
+Road 2: (3, 0) 
+Road 3: (69, 31) 
+Road 4: (0, 0) 
+Road 5: (11, 0) 
+Road 6: (11, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (4, 0) 
+Road 2: (2, 14) 
+Road 3: (65, 0) 
+Road 4: (0, 3) 
+Road 5: (19, 0) 
+Road 6: (6, 81) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (7, 0) 
+Road 2: (1, 0) 
+Road 3: (57, 96) 
+Road 4: (0, 0) 
+Road 5: (28, 0) 
+Road 6: (3, 1) 
+Road 7: (0, 0) 
+Road 8: (0, 1) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (12, 7) 
+Road 2: (1, 46) 
+Road 3: (46, 17) 
+Road 4: (0, 11) 
+Road 5: (37, 0) 
+Road 6: (2, 5) 
+Road 7: (0, 0) 
+Road 8: (0, 11) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (18, 0) 
+Road 2: (1, 51) 
+Road 3: (35, 8) 
+Road 4: (0, 16) 
+Road 5: (41, 0) 
+Road 6: (1, 13) 
+Road 7: (0, 0) 
+Road 8: (0, 10) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (27, 6) 
+Road 2: (1, 31) 
+Road 3: (27, 25) 
+Road 4: (1, 19) 
+Road 5: (39, 0) 
+Road 6: (1, 11) 
+Road 7: (1, 0) 
+Road 8: (0, 5) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (30, 15) 
+Road 3: (24, 36) 
+Road 4: (2, 16) 
+Road 5: (28, 0) 
+Road 7: (1, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 2: (6, 1) 
+Road 3: (54, 78) 
+Road 4: (0, 0) 
+Road 6: (33, 16) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (1, 4) 
+Road 2: (3, 0) 
+Road 3: (66, 95) 
+Road 4: (0, 0) 
+Road 5: (5, 0) 
+Road 6: (22, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (2, 100) 
+Road 2: (2, 0) 
+Road 3: (74, 0) 
+Road 4: (0, 0) 
+Road 5: (10, 0) 
+Road 6: (10, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (3, 74) 
+Road 2: (1, 1) 
+Road 3: (66, 0) 
+Road 4: (0, 0) 
+Road 5: (23, 0) 
+Road 6: (4, 23) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (6, 0) 
+Road 2: (0, 0) 
+Road 3: (52, 99) 
+Road 4: (0, 0) 
+Road 5: (37, 0) 
+Road 6: (1, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (12, 84) 
+Road 2: (0, 10) 
+Road 3: (36, 0) 
+Road 4: (0, 0) 
+Road 5: (48, 0) 
+Road 6: (0, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 4) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (22, 4) 
+Road 2: (0, 44) 
+Road 3: (22, 0) 
+Road 4: (0, 11) 
+Road 5: (51, 0) 
+Road 6: (0, 31) 
+Road 7: (0, 0) 
+Road 8: (0, 8) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (35, 1) 
+Road 2: (1, 27) 
+Road 3: (19, 40) 
+Road 4: (1, 11) 
+Road 5: (41, 0) 
+Road 6: (0, 14) 
+Road 7: (1, 0) 
+Road 8: (0, 3) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (37, 9) 
+Road 3: (18, 48) 
+Road 4: (2, 12) 
+Road 5: (28, 0) 
+Road 7: (2, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 2: (6, 4) 
+Road 3: (42, 56) 
+Road 4: (0, 0) 
+Road 6: (47, 35) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (0, 2) 
+Road 2: (2, 0) 
+Road 3: (64, 85) 
+Road 4: (0, 0) 
+Road 5: (2, 0) 
+Road 6: (29, 11) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (1, 4) 
+Road 2: (1, 0) 
+Road 3: (79, 95) 
+Road 4: (0, 0) 
+Road 5: (8, 0) 
+Road 6: (8, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (2, 0) 
+Road 2: (0, 5) 
+Road 3: (64, 0) 
+Road 4: (0, 0) 
+Road 5: (29, 0) 
+Road 6: (2, 94) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (6, 0) 
+Road 2: (0, 0) 
+Road 3: (40, 99) 
+Road 4: (0, 0) 
+Road 5: (51, 0) 
+Road 6: (0, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (15, 33) 
+Road 2: (0, 0) 
+Road 3: (15, 64) 
+Road 4: (0, 0) 
+Road 5: (67, 0) 
+Road 6: (0, 1) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (36, 0) 
+Road 2: (0, 11) 
+Road 3: (12, 73) 
+Road 4: (0, 0) 
+Road 5: (48, 0) 
+Road 6: (0, 13) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (46, 0) 
+Road 2: (0, 18) 
+Road 3: (12, 63) 
+Road 4: (1, 3) 
+Road 5: (36, 0) 
+Road 6: (0, 12) 
+Road 7: (2, 0) 
+Road 8: (0, 1) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (45, 11) 
+Road 3: (13, 54) 
+Road 4: (2, 7) 
+Road 5: (26, 0) 
+Road 7: (2, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 2: (7, 9) 
+Road 3: (9, 9) 
+Road 4: (0, 0) 
+Road 6: (80, 77) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (0, 0) 
+Road 2: (2, 0) 
+Road 3: (53, 56) 
+Road 4: (0, 0) 
+Road 5: (0, 0) 
+Road 6: (43, 41) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (0, 0) 
+Road 2: (0, 0) 
+Road 3: (87, 98) 
+Road 4: (0, 0) 
+Road 5: (5, 0) 
+Road 6: (5, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (2, 18) 
+Road 2: (0, 0) 
+Road 3: (53, 81) 
+Road 4: (0, 0) 
+Road 5: (43, 0) 
+Road 6: (0, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (8, 0) 
+Road 2: (0, 0) 
+Road 3: (8, 99) 
+Road 4: (0, 0) 
+Road 5: (83, 0) 
+Road 6: (0, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (40, 98) 
+Road 2: (0, 0) 
+Road 3: (6, 0) 
+Road 4: (0, 0) 
+Road 5: (51, 0) 
+Road 6: (0, 1) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (52, 26) 
+Road 2: (0, 2) 
+Road 3: (6, 65) 
+Road 4: (0, 0) 
+Road 5: (37, 0) 
+Road 6: (0, 4) 
+Road 7: (1, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (57, 11) 
+Road 2: (0, 8) 
+Road 3: (7, 72) 
+Road 4: (1, 1) 
+Road 5: (29, 0) 
+Road 6: (0, 5) 
+Road 7: (3, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (52, 18) 
+Road 3: (9, 52) 
+Road 4: (2, 5) 
+Road 5: (21, 0) 
+Road 7: (4, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 2: (52, 64) 
+Road 3: (2, 0) 
+Road 4: (0, 0) 
+Road 6: (42, 32) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (0, 0) 
+Road 2: (2, 2) 
+Road 3: (2, 1) 
+Road 4: (0, 0) 
+Road 5: (0, 0) 
+Road 6: (95, 95) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (0, 0) 
+Road 2: (0, 0) 
+Road 3: (99, 99) 
+Road 4: (0, 0) 
+Road 5: (0, 0) 
+Road 6: (0, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (2, 63) 
+Road 2: (0, 0) 
+Road 3: (2, 36) 
+Road 4: (0, 0) 
+Road 5: (95, 0) 
+Road 6: (0, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (53, 82) 
+Road 2: (0, 0) 
+Road 3: (2, 17) 
+Road 4: (0, 0) 
+Road 5: (43, 0) 
+Road 6: (0, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (64, 83) 
+Road 2: (0, 0) 
+Road 3: (2, 16) 
+Road 4: (0, 0) 
+Road 5: (29, 0) 
+Road 6: (0, 0) 
+Road 7: (2, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (66, 0) 
+Road 2: (0, 2) 
+Road 3: (3, 95) 
+Road 4: (1, 0) 
+Road 5: (23, 0) 
+Road 6: (0, 2) 
+Road 7: (4, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (65, 36) 
+Road 2: (0, 4) 
+Road 3: (5, 54) 
+Road 4: (2, 1) 
+Road 5: (20, 0) 
+Road 6: (0, 2) 
+Road 7: (6, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (57, 40) 
+Road 3: (6, 34) 
+Road 4: (3, 4) 
+Road 5: (16, 0) 
+Road 7: (7, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 2: (85, 83) 
+Road 3: (0, 0) 
+Road 4: (0, 1) 
+Road 6: (6, 5) 
+Road 8: (5, 8) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (0, 0) 
+Road 2: (99, 99) 
+Road 3: (0, 0) 
+Road 4: (0, 0) 
+Road 5: (0, 0) 
+Road 6: (0, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (22, 24) 
+Road 2: (22, 20) 
+Road 3: (26, 0) 
+Road 4: (22, 35) 
+Road 5: (1, 0) 
+Road 6: (1, 0) 
+Road 7: (1, 0) 
+Road 8: (1, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (99, 99) 
+Road 2: (0, 0) 
+Road 3: (0, 0) 
+Road 4: (0, 0) 
+Road 5: (0, 0) 
+Road 6: (0, 0) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (86, 99) 
+Road 2: (0, 0) 
+Road 3: (0, 0) 
+Road 4: (0, 0) 
+Road 5: (6, 0) 
+Road 6: (0, 0) 
+Road 7: (5, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (78, 99) 
+Road 2: (0, 0) 
+Road 3: (1, 0) 
+Road 4: (1, 0) 
+Road 5: (10, 0) 
+Road 6: (0, 0) 
+Road 7: (8, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (73, 98) 
+Road 2: (0, 0) 
+Road 3: (2, 1) 
+Road 4: (1, 0) 
+Road 5: (11, 0) 
+Road 6: (0, 0) 
+Road 7: (10, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (69, 90) 
+Road 2: (0, 1) 
+Road 3: (3, 4) 
+Road 4: (3, 2) 
+Road 5: (12, 0) 
+Road 6: (0, 0) 
+Road 7: (11, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (60, 66) 
+Road 3: (4, 9) 
+Road 4: (4, 5) 
+Road 5: (11, 0) 
+Road 7: (10, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 2: (55, 55) 
+Road 4: (2, 0) 
+Road 8: (38, 40) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (0, 0) 
+Road 2: (2, 0) 
+Road 4: (2, 2) 
+Road 7: (0, 0) 
+Road 8: (93, 97) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (0, 0) 
+Road 2: (0, 0) 
+Road 4: (98, 99) 
+Road 7: (0, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (2, 0) 
+Road 2: (0, 0) 
+Road 4: (2, 98) 
+Road 7: (93, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (56, 59) 
+Road 2: (0, 0) 
+Road 4: (2, 40) 
+Road 7: (39, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (67, 0) 
+Road 2: (0, 0) 
+Road 4: (2, 92) 
+Road 7: (26, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (70, 48) 
+Road 2: (0, 1) 
+Road 4: (3, 36) 
+Road 7: (21, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (69, 58) 
+Road 2: (0, 3) 
+Road 4: (4, 22) 
+Road 7: (19, 0) 
+Road 8: (0, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################
+You are driving your car and arrive at an intersection.     There are several possible roads in which one can exit.  You have to decide where to proceed.    For each road, you have two pieces of information: 
+ 
+     how good the road is in terms of getting you to the destination quickly, but possibly unsafely;
+     how good the road is in terms of getting you to the destination safely but with possible delay. 
+     
+ 
+ Road 1: (61, 48) 
+Road 4: (6, 18) 
+Road 7: (16, 0) 
+
+ Please choose one of the roads out of the intersection.
+##############################

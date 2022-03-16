@@ -151,16 +151,18 @@ class MCA:
 
 				action_thresholds[0] = self.modelSelf.getNTrajectories(state)
 				action_thresholds[1] = current_reward / expected_avg_reward
+				#action_thresholds[2] = (1 - self.modelSelf.getM()) * confidence
 				action_thresholds[2] = confidence
 
-				if not self.only_s2 and ((self.modelSelf.getNTrajectories(state) <= self.threshold1) or (current_reward / expected_avg_reward < self.threshold2) or (confidence <= self.threshold3)):
+				if not self.only_s2 and ((action_thresholds[0] <= self.threshold1) or (action_thresholds[1] < self.threshold2) or (action_thresholds[2] <= self.threshold3)):
 					engageS2 = False
+					#print(f"self.modelSelf.getM(): {self.modelSelf.getM()}")
 
-					if (self.modelSelf.getNTrajectories(state) <= self.threshold1):
+					if (action_thresholds[0] <= self.threshold1):
 						action_thresholds_mask[0] = 1 
-					if (current_reward / expected_avg_reward < self.threshold2):
+					if (action_thresholds[1] < self.threshold2):
 						action_thresholds_mask[1] = 1  
-					if (confidence <= self.threshold3):
+					if (action_thresholds[2] <= self.threshold3):
 						action_thresholds_mask[2] = 1  					
 
 					action_thresholds[5] = self.modelSelf.getNTrajectoryStateS2(state)
@@ -199,6 +201,10 @@ class MCA:
 							action_thresholds_mask[3] = 1  					
 							engageS2 = True
 							#print("Engage S2")
+						#else:
+							#self.modelSelf.getRewardS2(state, verbose=True)
+							#self.modelSelf.getReward(state, action, verbose=True)
+							#print(f"{expected_rew_move_s2} - {expected_rew_move_s1} / {max_diff_rew} / expected_cost_s2 {expected_cost_s2}")
 
 				#if self.only_s2: print(f"Engage S2: {engageS2}")
 				if engageS2:

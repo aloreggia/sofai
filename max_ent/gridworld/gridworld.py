@@ -164,10 +164,12 @@ class GridWorld:
             containing all transition probabilities. The individual
             transition probabilities are defined by `self._transition_prob'.
         """
+        
         table = np.zeros(shape=(self.n_states, self.n_states, self.n_actions))
         # For each state perform all actions and add the corresponding probability to the transition
         for si in range(self.n_states):
             s = self.state_index_to_point(si)
+            
             for a in self.actions:
                 for performed_a in self.actions:
                     off = self.off_grid(s, performed_a)

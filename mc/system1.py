@@ -4,13 +4,13 @@ class System1Solver:
 	def __init__(self):
 		super()
 
-	def policy(self, modelSelf, state):
+	def policy(self, modelSelf, state, myopic=False):
 
 		#per ogni azione computa la probabilità che appartenga a una traiettoria positiva
 		#argmax prob dell'azione 
 
-		list_Action = [modelSelf.getReward(state, a)[0]*modelSelf.getReward(state, a)[1] for a in range(8)]
-		list_Confidence = [modelSelf.getReward(state, a)[1] for a in range(8)]
+		list_Action = [modelSelf.getReward(state, a, immediate = myopic)[0]*modelSelf.getReward(state, a, immediate = myopic)[1] for a in range(8)]
+		list_Confidence = [modelSelf.getReward(state, a, immediate = myopic)[1] for a in range(8)]
 
 		#extract all the action with higher exp * confidence
 		#print(f"list_Action: {list_Action}")
