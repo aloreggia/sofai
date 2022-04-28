@@ -1,4 +1,5 @@
 import numpy as np
+from torch import threshold
 from max_ent.gridworld.trajectory import Trajectory
 from max_ent.algorithms.gridworld_icrl import Demonstration
 import time
@@ -11,7 +12,7 @@ from random import random
 class MCA:
 
 	def __init__(self, n=None, c=None, demo=None, s1=None, s2=None, modelSelf=None, threshold1=200, threshold2 = 0.8, \
-				threshold3 = 0.5, initial_time=100, threshold4 = 0, \
+				threshold3 = 0.9, initial_time=0.3, threshold4 = 200, \
 				threshold5 = 0, threshold6 = 1, threshold7 = 0.5, only_s1 = False, only_s2 = False, mixed= False):
 		assert(only_s1 != only_s2 or (not only_s1 and not only_s2 ))
 
@@ -24,7 +25,7 @@ class MCA:
 		if modelSelf!= None: self.modelSelf = modelSelf
 		else: self.modelSelf = ModelSelf(n, c, demo)
 
-		print(f"threshold1: {threshold1}")
+		#print(f"threshold1: {threshold1}")
 		self.threshold1 = threshold1
 		self.threshold2 = threshold2
 		self.threshold3 = threshold3
@@ -54,6 +55,7 @@ class MCA:
 		self.time_left = initial_time * 1000 #change sec in millisec
 		self.only_s1 = only_s1
 		self.only_s2 = only_s2
+		self.max_time_s2 = float("-inf")
 
 		self.mixed = mixed
 		if self.mixed: 
@@ -129,6 +131,7 @@ class MCA:
 				state = self.modelSelf.getStart()
 				trial += 1
 				temp_thresholds_stat = []
+				temp_thresholds_mask = []
 				self.time_left = self.fixed_time_left
 
 			#S1 computes an action based on previous experience
@@ -150,9 +153,21 @@ class MCA:
 				w = self.w
 
 				action_thresholds[0] = self.modelSelf.getNTrajectories(state)
-				action_thresholds[1] = current_reward / expected_avg_reward
-				#action_thresholds[2] = (1 - self.modelSelf.getM()) * confidence
-				action_thresholds[2] = confidence
+				#print(f"state {state} \t current_reward:{current_reward} \t expected_avg_reward: {expected_avg_reward}")
+				if current_reward>=0 and expected_avg_reward > 0:
+					action_thresholds[1] = current_reward / expected_avg_reward
+				elif current_reward<=0 and expected_avg_reward < 0:
+					action_thresholds[1] = expected_avg_reward / current_reward  
+				elif current_reward>=0 and expected_avg_reward < 0:
+					action_thresholds[1] = float("+inf")
+				elif current_reward<=0 and expected_avg_reward > 0:
+					action_thresholds[1] = float("-inf")
+
+
+				if self.modelSelf.total_transitions >= self.threshold4:
+					action_thresholds[2] = (1 - self.modelSelf.getM()) * confidence
+				else:
+					action_thresholds[2] = confidence
 
 				if not self.only_s2 and ((action_thresholds[0] <= self.threshold1) or (action_thresholds[1] < self.threshold2) or (action_thresholds[2] <= self.threshold3)):
 					engageS2 = False
@@ -165,7 +180,57 @@ class MCA:
 					if (action_thresholds[2] <= self.threshold3):
 						action_thresholds_mask[2] = 1  					
 
-					action_thresholds[5] = self.modelSelf.getNTrajectoryStateS2(state)
+					#compute the average time taken by S2 to compute a move
+					expected_time_s2 = 1 #should de derived from past experience
+					if self.usage_s2 != 0:
+						#compute avg S2 time
+						expected_time_s2 = (self.time_usage_s2 / self.usage_s2) 
+						 
+
+					if self.time_left>0 :
+						expected_cost_s2 = expected_time_s2 / self.time_left
+					else:
+						expected_cost_s2 = float('+inf')
+
+					expected_rew_move_s1 = self.modelSelf.getReward(state, action)[0]
+					expected_rew_move_s2 = self.modelSelf.getRewardS2(state, maxLike=True, verbose=False)
+
+					action_thresholds[3] = expected_rew_move_s1
+					action_thresholds[4] = expected_rew_move_s2
+					action_thresholds[5] = expected_cost_s2
+					if ( action_thresholds[5] <= 1):
+						#if (action_thresholds[3] - action_thresholds[4]) <= 0: 
+						#	action_thresholds_mask[3] = 1  					
+
+						if action_thresholds[5] <= 1:
+							action_thresholds_mask[4] = 1  
+						#engage S2 at random
+						random_chance = random()
+						action_thresholds[6] = random_chance
+
+						if  action_thresholds[6] < (1 - (1 - self.threshold3)* 1E-2):
+							action_thresholds_mask[5] = 1
+							'''min_rew_s2, max_rew_s2 = self.modelSelf.getMinMaxPartialReward(state, s2 = True)
+							#print(f"min_rew_s2, max_rew_s2 {min_rew_s2, max_rew_s2}")
+							min_rew, max_rew = self.modelSelf.getMinMaxPartialReward(state)
+							min_rew = np.abs(min_rew_s2 - max_rew)
+							max_rew = np.abs(max_rew_s2 - min_rew)
+							max_diff_rew = max(min_rew, max_rew)'''
+
+							discount = -1
+							if action_thresholds[4] >=0: discount = 1
+
+							if (action_thresholds[4] * (1 - discount * action_thresholds[5]) >= action_thresholds[3] * (1 - discount * self.threshold3)):
+								action_thresholds_mask[6] = 1  		
+								engageS2 = True
+							#else:
+							#	print(f"({action_thresholds[4]} * (1 - {discount} * {action_thresholds[5]}) >= {action_thresholds[3]} * (1 - {discount} * {self.threshold3}))")
+
+							#engageS2 = True
+							#action_thresholds_mask[6] = 1 
+					
+
+					'''action_thresholds[5] = self.modelSelf.getNTrajectoryStateS2(state)
 					
 					if self.modelSelf.getNTrajectoryStateS2(state)< self.threshold6:
 						action_thresholds_mask[5] = 1  					
@@ -204,7 +269,7 @@ class MCA:
 						#else:
 							#self.modelSelf.getRewardS2(state, verbose=True)
 							#self.modelSelf.getReward(state, action, verbose=True)
-							#print(f"{expected_rew_move_s2} - {expected_rew_move_s1} / {max_diff_rew} / expected_cost_s2 {expected_cost_s2}")
+							#print(f"{expected_rew_move_s2} - {expected_rew_move_s1} / {max_diff_rew} / expected_cost_s2 {expected_cost_s2}")'''
 
 				#if self.only_s2: print(f"Engage S2: {engageS2}")
 				if engageS2:
@@ -274,6 +339,7 @@ class MCA:
 			else:
 				self.usage_s2 += 1
 				self.time_usage_s2 += time_exp
+				if time_exp > self.max_time_s2: self.max_time_s2 = time_exp
 				s1_use = 0
 				self.time_left -= time_exp #reduce the remaining time
 			

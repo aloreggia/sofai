@@ -8,7 +8,7 @@ import math
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvas
 from scipy.spatial import distance
-import random
+#import random
 import pickle
 from scipy import stats
 
@@ -16,6 +16,159 @@ from scipy import stats
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join('../')))
+
+from mc.self import *
+from mc.system1 import *
+from mc.system2 import *
+from mc.mca import *
+
+def compute_mean(target = None):
+
+    df = pd.DataFrame()
+
+    if target: 
+
+        for i in range(0, len(target.time_stat)):
+            #print(f"Stat: {mca.trajectory_stat[i]}")
+            mask_1 = np.array(target.trajectory_stat[i]) == 1
+            mask_2 = np.array(target.trajectory_stat[i]) == 0
+            
+            #Creaty np array from time array
+            selected = np.array(target.time_stat[i])
+            #Select actions in trajectory based on which system computed them
+            selected_1= selected[mask_1]
+            selected_2= selected[mask_2]
+            #Compute total time per solver
+            time_s1 = np.sum(selected_1)
+            time_s2 = np.sum(selected_2)
+            
+            #Creaty np array from trajectory array
+            selected = np.array(target.trajectory_stat[i])
+            #Select builder in trajectory based on which system computed them
+            selected_1= selected[mask_1]
+            selected_2= selected[mask_2]
+            #Compute total time per solver
+            usage_s1 = np.sum(selected_1)
+            usage_s2 = len(target.trajectory_stat[i]) - np.sum(selected_1)
+            
+            #Creaty np array from trajectory array
+            selected = np.array(target.action_reward[i])
+            #Select builder in trajectory based on which system computed them
+            selected_1= selected[mask_1]
+            selected_2= selected[mask_2]
+            #Compute total time per solver
+            reward_s1 = np.sum(selected_1)
+            reward_s2 = np.sum(selected_2)
+            
+
+            dict_mca = {}
+            dict_mca['traj_n'] = i
+            dict_mca['length'] = len(target.trajectory_stat[i])
+            dict_mca['reward'] = np.sum(target.action_reward[i])
+            dict_mca['time'] = np.sum(target.time_stat[i])
+            
+            dict_mca['sub_type'] = "s1"
+            dict_mca['time_agent'] = time_s1
+            dict_mca['avg_time'] = time_s1 / usage_s1
+            dict_mca['reward_agent'] = reward_s1
+            dict_mca['avg_reward'] = reward_s1 / usage_s1
+            dict_mca['usage']= usage_s1
+            dict_mca['perc_usage']= usage_s1 / len(target.trajectory_stat[i])
+            temp_df = pd.DataFrame(data=dict_mca, index=[i])
+            df = pd.concat([df, temp_df])
+            
+            
+            dict_mca = {}
+            dict_mca['traj_n'] = i
+            dict_mca['length'] = len(target.trajectory_stat[i])
+            dict_mca['reward'] = np.sum(target.action_reward[i])
+            dict_mca['time'] = np.sum(target.time_stat[i])
+            
+            dict_mca['sub_type'] = "s2"
+            dict_mca['time_agent'] = time_s2
+            dict_mca['avg_time'] = time_s2 / usage_s2
+            dict_mca['reward_agent'] = reward_s2
+            dict_mca['avg_reward'] = reward_s2 / usage_s2
+            dict_mca['usage']= usage_s2
+            dict_mca['perc_usage']= usage_s2 / len(target.trajectory_stat[i])
+            
+            temp_df = pd.DataFrame(data=dict_mca, index=[i])
+            df = pd.concat([df, temp_df])
+            
+    else:
+        dict_mca = {}
+        dict_mca['traj_n'] = 0
+        dict_mca['length'] = 0
+        dict_mca['reward'] = 0
+        dict_mca['time'] = 0
+
+        dict_mca['sub_type'] = "null"
+        dict_mca['time_agent'] = 0
+        dict_mca['avg_time'] = 0 
+        dict_mca['reward_agent'] = 0
+        dict_mca['avg_reward'] = 0 
+        dict_mca['usage']= 0
+            
+        temp_df = pd.DataFrame(data=dict_mca, index=[0])
+        df = pd.concat([df, temp_df])
+
+    
+    #print(dict_mca)
+    
+    return df
+
+
+def plot_results(df, x, y, min_label, max_label, bootstrap = 0):
+    
+    fig=plt.figure(figsize=(12, 7))
+    sns.set(rc={'figure.figsize':(11.7,8.27)})
+    sns.set_theme(style="whitegrid")
+    sns.set(font_scale=2)
+    sns.color_palette("viridis", as_cmap=True)
+    temp_df = df.loc[(df['type']!="S1 noMyopic")&(df['type']!="const")&(df['type']!="nominal")& (df['type']!="S1 Myopic") & (df['type']!="S2")& (df['traj_n']>=bootstrap)]
+    #print("Prima")
+    #g=sns.lineplot(x=x, y=y, data=df, hue="type",markers=True, dashes=False)
+    g = sns.barplot(x=x, y=y, hue="type", data=temp_df, palette="autumn", ci=95);
+    #print("Dopo")
+    #g.set_xticklabels([f"({(i)/10:0.1f}, {1 - (i)/10:0.1f})" for i in range(11)])
+    
+    constrained_line = np.mean(df.loc[(df['type']=="const")][y])
+    nominal_line = np.mean(df.loc[(df['type']=="nominal")][y])
+    #print(f"constrained_line: {constrained_line} {y}")
+    #print(f"nominal_line: {nominal_line} {y}")
+    #s1_line = np.mean(df.loc[(df['type']=="s1")& (df['traj_n']>=bootstrap)][y])
+    s2_line = np.mean(df.loc[(df['type']=="S2")& (df['traj_n']>=0)][y])
+    #mixed_line = np.median(temp_df.loc[(temp_df['type']=="mixed")& (temp_df['traj_n']>=bootstrap)][y])
+    s1nb_line_noMyopic = np.mean(df.loc[(df['type']=="S1 noMyopic")& (df['traj_n']>=0)][y])
+    s1nb_line_Myopic = np.mean(df.loc[(df['type']=="S1 Myopic")& (df['traj_n']>=0)][y])
+    
+    #print(f"s2: {s2_line} s1:{s1nb_line}")
+    
+    g.axhline(constrained_line, color='r', linestyle='--', label="RL Constrained")
+    g.axhline(nominal_line, color='b', linestyle='--', label="RL Nominal")
+    #g.axhline(s1_line, color='b', linestyle='--', label="S1")
+    #g.axhline(mixed_line, color='g', linestyle='--', label="Mixed")
+    g.axhline(s1nb_line_noMyopic, color='b', linestyle='-.', label="S1 no Myopic")
+    g.axhline(s1nb_line_Myopic, color='black', linestyle='-.', label="S1 Myopic")
+    g.axhline(s2_line, color='g', linestyle='-.', label="S2")
+    #g.set_ylim([min_label, max_label])
+
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    #plt.title(label=y+" varying "+x)
+    
+    '''h, l = g.get_legend_handles_labels()
+    labels=["S1", "S2","SOFAI 10","SOFAI 01","SOFAI 02"]
+    g.legend(h, labels)'''
+    plt.legend()
+    plt.grid(alpha=0.3)
+    #g.set_xticks(range(11)) # <--- set the ticks first
+
+    #plt.xlabel("W(Nominal, Constraints)")
+    #plt.ylabel("Avg JS dist")
+    plt.show()
+    #fig.savefig(os.path.join("./", f"{y}_varying_{x}.png"), bbox_inches = 'tight')
+    fig.savefig(os.path.join("./", f"{y}.png"), bbox_inches = 'tight')
 
 
 def conf_interval(array):
@@ -410,3 +563,119 @@ def compute_statistics_grid(nominal_matrix, constrained_matrix, learned_matrix, 
                  "avg_js_dist_constrained": avg_js_distance_constrained_mdft, "avg_js_div_nominal": avg_js_divergence_nominal_mdft, "avg_js_div_constrained": avg_js_divergence_constrained_mdft, "avg_min_nominal_length": np.mean(each_min_nominal_length)}
 
     return dict_mdft
+
+def build_dict(temp_matrix, type_mca, agent=None, s1_usage=0,  t1=200, t2=0.8, t3=0, t4=0, t6=1, t7=0.5, bootstrap=0):
+    '''temp_dict={}
+    temp_dict['type']= type_mca
+    temp_dict['Length']= temp_matrix[1]
+    temp_dict['Reward']= temp_matrix[2]
+    temp_dict['Viol'] = temp_matrix[4]
+    temp_dict['S1_Usage'] = s1_usage
+    temp_dict['t1'] = t1
+    temp_dict['t2'] = t2
+    temp_dict['t3'] = t3
+    temp_dict['t4'] = t4
+    temp_dict['t6'] = t6
+    temp_dict['t7'] = t7
+    temp_df = pd.DataFrame(data=temp_dict, index=[0])'''
+    
+    temp_df = compute_mean(agent)
+    temp_df['type']= type_mca
+    temp_df['Length']= temp_matrix[1]
+    if agent == None: temp_df['length']= temp_matrix[1]
+    temp_df['Reward']= temp_matrix[2]
+    if agent == None: temp_df['reward']= temp_matrix[2]
+    temp_df['Viol'] = temp_matrix[4]
+    temp_df['S1_Usage'] = s1_usage
+    temp_df['t1'] = t1
+    temp_df['t2'] = t2
+    temp_df['t3'] = t3
+    temp_df['t4'] = t4
+    temp_df['t6'] = t6
+    temp_df['t7'] = t7
+    
+    return temp_df
+
+def simulation(n_cfg, c_cfg, demo, demo_mca_s1, demo_mca_s2, mca_s1, mca_s2, constraints, n_trajectories=200, 
+               threshold1 = 200, threshold2 = 0.8, threshold3 = 0.4, 
+               threshold4 = 200, threshold6 = 1, threshold7 = 0.5, df=None, jsdiv =None, bootstrap = 0):
+    
+    if df is None:
+        df = pd.DataFrame()
+        
+    if jsdiv is None:
+        jsdiv = pd.DataFrame()
+   
+    n=n_cfg.mdp
+    c=c_cfg.mdp
+    
+    '''temp_matrix = count_states(demo.trajectories, c_cfg.mdp, n, constraints)
+    temp_dict=build_dict(temp_matrix, type_mca='const')
+    df = pd.concat([df, temp_dict])
+
+    #mca_s1 = MCA(n=n, c=c, demo=demo, only_s1=True)
+    #demo_mca_s1 = mca_s1.generate_trajectories(n_trajectories)
+    temp_matrix_mca_s1 = count_states(demo_mca_s1.trajectories, c_cfg.mdp, n, constraints, bootstrap = bootstrap)
+    temp_dict=build_dict(temp_matrix_mca_s1, type_mca='s1', agent=mca_s1, s1_usage=mca_s1.getStatistics()[0])
+    df = pd.concat([df, temp_dict])
+
+    #mca_s2 = MCA(n=n, c=c, demo=demo, only_s2=True)
+    #demo_mca_s2 = mca_s2.generate_trajectories(n_trajectories)
+    temp_matrix_mca_s2 = count_states(demo_mca_s2.trajectories, c_cfg.mdp, n, constraints, bootstrap = bootstrap)
+    temp_dict=build_dict(temp_matrix_mca_s2, type_mca='s2', agent=mca_s2 )
+    df = pd.concat([df, temp_dict])'''
+    
+    #for t3 in threshold3:
+    #    for t4 in threshold4:
+    #print(f"t1:{t1} t2:{t2} t3:{t3} t4:{t4} t6:{t6} t7:{t7} ")
+
+    mca_10 = MCA(n=n, c=c, demo=None, threshold1 = threshold1,  threshold3 = threshold3, threshold4 = threshold4, threshold5 = 0)
+    demo_mca_10 = mca_10.generate_trajectories(n_trajectories)
+    temp_matrix_mca_10 = count_states(demo_mca_10.trajectories, c_cfg.mdp, n, constraints, bootstrap = bootstrap)
+    temp_dict=build_dict(temp_matrix_mca_10, type_mca='10', agent= mca_10, s1_usage=mca_10.getStatistics()[0], t1=threshold1, t3=threshold3, t4=threshold4)
+    f1 = G.plot_world(f'MCA 10', c, c_cfg.state_penalties, c_cfg.action_penalties, c_cfg.color_penalties, demo_mca_10, c_cfg.blue, c_cfg.green, vmin=-50, vmax=10)
+    df = pd.concat([df, temp_dict])
+
+
+    mca_01 = MCA(n=n, c=c, demo=None, threshold1 = threshold1, threshold3 = threshold3, threshold4 = threshold4, threshold5 = 1)
+    demo_mca_01 = mca_01.generate_trajectories(n_trajectories)
+    temp_matrix_mca_01 = count_states(demo_mca_01.trajectories, c_cfg.mdp, n, constraints, bootstrap = bootstrap)
+    temp_dict=build_dict(temp_matrix_mca_01, type_mca='01', agent=mca_01, s1_usage=mca_01.getStatistics()[0], t1=threshold1,t3=threshold3, t4=threshold4)
+    f1 = G.plot_world(f'MCA 01', c, c_cfg.state_penalties, c_cfg.action_penalties, c_cfg.color_penalties, demo_mca_01, c_cfg.blue, c_cfg.green, vmin=-50, vmax=10)
+    df = pd.concat([df, temp_dict])
+
+
+    mca_02 = MCA(n=n, c=c, demo=None, threshold1 = threshold1, threshold3 = threshold3, threshold4 = threshold4, threshold5 = 2)
+    demo_mca_02 = mca_02.generate_trajectories(n_trajectories)
+    temp_matrix_mca_02 = count_states(demo_mca_02.trajectories, c_cfg.mdp, n, constraints, bootstrap = bootstrap)
+    temp_dict=build_dict(temp_matrix_mca_02, type_mca='02', agent=mca_02, s1_usage=mca_02.getStatistics()[0],  t1=threshold1,t3=threshold3, t4=threshold4)
+    df = pd.concat([df, temp_dict])
+    #print(mca_02.__dict__)
+    f1 = G.plot_world(f'MCA 02', c, c_cfg.state_penalties, c_cfg.action_penalties, c_cfg.color_penalties, demo_mca_02, c_cfg.blue, c_cfg.green, vmin=-50, vmax=10)
+
+    
+    temp_jsdiv = {}
+    temp_jsdiv['t3'] = threshold3
+    temp_jsdiv['t4'] = threshold4
+    temp_jsdiv['jsdiv'] = js_divergence((mca_s2.modelSelf.ntra_per_transition + 1E-10)/np.sum(mca_s2.modelSelf.ntra_per_transition + 1E-10), (mca_01.modelSelf.ntra_per_transition + 1E-10)/np.sum(mca_01.modelSelf.ntra_per_transition + 1E-10))
+    temp_jsdiv['type'] = '01'
+    temp_jsdiv = pd.DataFrame(data=temp_jsdiv, index=[0])
+    jsdiv = pd.concat([jsdiv, temp_jsdiv])
+    
+    temp_jsdiv = {}
+    temp_jsdiv['t3'] = threshold3
+    temp_jsdiv['t4'] = threshold4
+    temp_jsdiv['jsdiv'] = js_divergence((mca_s2.modelSelf.ntra_per_transition + 1E-10)/np.sum(mca_s2.modelSelf.ntra_per_transition + 1E-10), (mca_10.modelSelf.ntra_per_transition + 1E-10)/np.sum(mca_10.modelSelf.ntra_per_transition + 1E-10))
+    temp_jsdiv['type'] = '10'
+    temp_jsdiv = pd.DataFrame(data=temp_jsdiv, index=[0])
+    jsdiv = pd.concat([jsdiv, temp_jsdiv])
+    
+    temp_jsdiv = {}
+    temp_jsdiv['t3'] = threshold3
+    temp_jsdiv['t4'] = threshold4
+    temp_jsdiv['jsdiv'] = js_divergence((mca_s2.modelSelf.ntra_per_transition + 1E-10)/np.sum(mca_s2.modelSelf.ntra_per_transition + 1E-10), (mca_02.modelSelf.ntra_per_transition + 1E-10)/np.sum(mca_02.modelSelf.ntra_per_transition + 1E-10))
+    temp_jsdiv['type'] = '02'
+    temp_jsdiv = pd.DataFrame(data=temp_jsdiv, index=[0])
+    jsdiv = pd.concat([jsdiv, temp_jsdiv])
+                            
+    return df, jsdiv

@@ -1,4 +1,5 @@
 from functools import update_wrapper
+from tkinter import TRUE
 import numpy as np
 from scipy.special import expit
 
@@ -59,10 +60,13 @@ class ModelSelf:
 
 	def getPartialRemainingReward(self, trajectory, transition):
 		reward = 0.0
+		reward = float("-inf")
 		find = False
 		for state in trajectory.transitions():
 			if (state == transition):
+				if not find: reward = 0.0
 				find=True
+				
 
 			if find:
 				reward += self.constraints.reward[state]
@@ -89,6 +93,7 @@ class ModelSelf:
 		#self.total_transitions += len(trajectory.transitions())
 
 		i = 0
+		temp_partial_reward = 0
 		for transition in trajectory.transitions():
 
 			self.avg_reward += self.constraints.reward[transition]
@@ -96,7 +101,7 @@ class ModelSelf:
 
 			# if the action is computed by s1 and the reward is lower than the average reward
 			# s1 gets wrong
-			if traj_builders[i]==1:
+			if traj_builders and traj_builders[i]==1:
 				self.total_transitions += 1
 				if self.constraints.reward[transition] < -4: #self.getAvgRewardPerTransition():
 					self.s1_wrong += 1
@@ -132,8 +137,9 @@ class ModelSelf:
 			self.part_length[state_t_coord].append(i)
 
 			#Update the partial reward for a given state
-			self.part_reward[state_t_coord] += self.constraints.reward[transition]
-			self.part_reward_state_action[state_t_coord][action] += self.constraints.reward[transition]
+			temp_partial_reward += self.constraints.reward[transition]
+			self.part_reward[state_t_coord] += temp_partial_reward
+			self.part_reward_state_action[state_t_coord][action] += temp_partial_reward
 
 			#create the dictionary for probabilities
 			if not self.prob[state_s_coord][action]: 
@@ -181,7 +187,7 @@ class ModelSelf:
 
 		self.std = np.std(self.ntra_per_transition  / np.sum(self.ntra_per_transition))
 
-	def getRewardS2(self, state_s, verbose=False):
+	def getRewardS2(self, state_s, verbose=False, maxLike = False):
 		"""
 		Given:
 		states: the actual position in the world
@@ -193,9 +199,11 @@ class ModelSelf:
 		state_s_coord = self.grid.world.state_index_to_point(state_s)
 		# total number of traj going through state_s with any action
 		total_traj = np.sum(self.ntra_per_stateAction_s2[state_s_coord])
+		if total_traj == 0: return -4
 		if verbose: print(f"S2 state: {state_s}")
  
 		temp_reward_list = []
+		temp_prob_list = []
 		for action in range(8):
 			#compute the list of reward*prob for an action			
 			temp_list = self.computeRewardsList(self.ntra_per_stateAction_s2, self.prob_s2, state_s, action)
@@ -204,11 +212,21 @@ class ModelSelf:
 			if verbose: print(f"action:{action} \n temp_list {temp_list} \t prob_take_action {prob_take_action}")
 			#if temp_list !=[]: 
 				#compute the exp_reward for an action
-			temp_reward_list.append(np.sum(temp_list)*prob_take_action)
+			temp_reward_list.append(np.sum(temp_list))#*prob_take_action)
+			temp_prob_list.append(prob_take_action)
 			
 		if verbose: print(f"temp_reward_list {temp_reward_list}")
 		#exp_reward = computeExpRewardState(self.ntra_per_stateAction_s2, self.ntra_per_state_s2, temp_reward_list, state_s_coord)
-		exp_reward = np.sum(temp_reward_list)
+		temp_reward_list = np.array(temp_reward_list)
+		temp_prob_list = np.array(temp_prob_list)
+		if not maxLike: 
+			exp_reward = np.sum(temp_reward_list * temp_prob_list)
+		else:
+			exp_reward = np.argwhere(temp_prob_list == np.amax(temp_prob_list))
+			exp_reward = exp_reward.reshape((len(exp_reward),))
+			#print(f"exp_reward: {exp_reward}")
+			exp_reward = np.random.choice(exp_reward, 1)[0]
+			exp_reward = temp_reward_list[exp_reward]
 
 		return exp_reward
 
@@ -225,10 +243,10 @@ class ModelSelf:
 		state_s_coord = self.grid.world.state_index_to_point(state_s)
 		#if (state,action) never appeared before then return -inf with the highest confidence
 		if not self.prob[state_s_coord][action]:
-			return float('-inf'), 1
+			return float('-inf'), 1E-03
 
 		#print(f"{self.prob[state_s_coord][action]}")
-		if verbose: print(f"S1 state: {state_s} \t action: {action}")
+		if verbose: print(f"IMMEDIATE: {immediate}	S1 state: {state_s} \t action: {action} ")
 
 		'''
 		build the distribution of reward * prob where:
@@ -237,17 +255,17 @@ class ModelSelf:
 		'''
 
 		temp_ntra_per_stateAction = np.sum(self.ntra_per_stateAction[state_s_coord])
-		#if immediate:
-		#	temp_list = self.computeRewardsList(self.ntra_per_transition, self.grid.reward, state_s, action, immediate=immediate)
-		#else:
-		temp_list = self.computeRewardsList(self.ntra_per_stateAction, self.prob, state_s, action, immediate=immediate)
+		if immediate:
+			temp_list = self.computeRewardsList(self.ntra_per_transition, self.grid.reward, state_s, action, immediate=immediate, verbose=verbose)
+		else:
+			temp_list = self.computeRewardsList(self.ntra_per_stateAction, self.prob, state_s, action, immediate=immediate, verbose=verbose)
 		
 		if verbose: print(f"action:{action} \n temp_list {temp_list} \t temp_ntra_per_stateAction {temp_ntra_per_stateAction}")
 		exp_reward = np.sum(temp_list)
 		#temp_list = temp_list /exp_reward
 		#print(f"temp_list_norm: {temp_list/exp_reward}")
 		#print(f"state: {state_s} \t action: {action} \t {self.prob[state_s_coord][action]}")
-		#print(f"templist: {temp_list}\n")
+		if verbose: print(f"templist: {temp_list}\n")
 		#move_cell_trajectories = self.prob[state_s_coord][action]['tot_trj']
 		#print(f"move: {move_cell_trajectories}\t tot_trj {self.prob[state_s_coord][action]['tot_trj']}")
 		#trajectories_per_state = self.getNTrajectories(state_s)
@@ -257,11 +275,15 @@ class ModelSelf:
 		r = self.ntra_per_stateAction[state_s_coord][action] / temp_ntra_per_stateAction
 		#print(f"r_post: {r}")
 		temp_std = np.std(temp_list)
-		confidence = expit(r/ (temp_std + 1e-10))
+
+		if exp_reward == float("-inf"):
+			confidence = 1E-03
+		else:
+			confidence = expit(r/ (temp_std + 1e-10))
 		#print(f"confidence: {confidence}")
 		#confidence = expit( r / (temp_std + 1e-10))
 		#print(f"confidence: {confidence}")
-		#print(f"exp_rew: {exp_reward} \t temp_std: {temp_std} \t r: {r} \t confidence: {confidence}")
+		if verbose: print(f"exp_rew: {exp_reward} \t temp_std: {temp_std} \t r: {r} \t confidence: {confidence}")
 
 		return exp_reward, confidence
 
@@ -276,6 +298,7 @@ class ModelSelf:
 	def getAvgPartialReward(self, state_s):
 		state_s_coord = self.grid.world.state_index_to_point(state_s)
 		#print(f"part_reward: {self.part_reward[state_s_coord]} \t tot_traj: {np.sum(self.ntra_per_transition[state_s_coord])}")
+		if self.getNTrajectories(state_s) == 0: return 1
 		return self.part_reward[state_s_coord] / self.getNTrajectories(state_s)
 
 	def getAvgPartialLength(self, state_s):
@@ -329,14 +352,16 @@ class ModelSelf:
 		state_s_coord = self.grid.world.state_index_to_point(state_s)
 		return self.ntra_per_state_s2[state_s_coord]
 
-	def computeRewardsList(self, ntra_per_stateAction, prob, state_s, action, isPrint=False, immediate = False):
+	def computeRewardsList(self, ntra_per_stateAction, prob, state_s, action, verbose=False, immediate = False):
 		temp_list = []
 		state_s_coord = self.grid.world.state_index_to_point(state_s)
 		if np.sum(ntra_per_stateAction[state_s_coord][action])>0:
 			if immediate:
-				print("IMMEDIATE")
 				#compute the total number of trajectories per (state,action)
 				total_traj = np.sum(ntra_per_stateAction[state_s_coord][action])
+				#print(f"IMMEDIATE \t total_traj: {total_traj}")
+				#print(f"state_s {state_s} \t action {action} \t {ntra_per_stateAction[state_s_coord][action]}")
+				#print(f"prob {prob[state_s][action]}")
 				#for immediate ntra_per_stateAction == ntra_per_transition and prob == grid.reward
 				temp_list = ntra_per_stateAction[state_s_coord][action] * prob[state_s][action].reshape((self.grid.world.size,self.grid.world.size))
 				temp_list = temp_list / total_traj
@@ -356,8 +381,8 @@ class ModelSelf:
 						temp_reward = key
 						temp_prob = prob[state_s_coord][action][key] / total_traj
 						temp_list.append(temp_reward * temp_prob)
-						if isPrint: print(f"temp_reward * temp_prob {temp_reward , temp_prob} \t {prob[state_s_coord][action][key] , total_traj}")
-		if isPrint: print(f"temp_list {temp_list}\n")
+						if verbose: print(f"temp_reward * temp_prob {temp_reward , temp_prob} \t {prob[state_s_coord][action][key] , total_traj}")
+		if verbose: print(f"temp_list {temp_list}\n")
 		return temp_list
 
 def computeExpRewardState(ntra_per_stateAction, ntra_per_state, exp_rew_per_action, state_s_coord):
