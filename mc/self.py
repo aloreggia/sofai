@@ -13,7 +13,7 @@ class ModelSelf:
 	__part_reward: for each state, it keeps track of the cumulative partial reward to reach the state
 	__prob: for each pair (state, action), it keeps track of the probability of taking the action in the state
 	"""
-	def __init__(self, grid, constrained, demo):
+	def __init__(self, grid, constrained, demo, risk_aversion=1):
 		self.ntra_per_transition = np.zeros((9, 9, 8, 9, 9)) #* 1e-10
 		self.ntra_per_transition_s2 = np.zeros((9, 9, 8, 9, 9)) #* 1e-10
 		self.ntra_per_stateAction = np.zeros((9, 9, 8))
@@ -27,13 +27,21 @@ class ModelSelf:
 		self.prob = np.ndarray(shape=(9,9,8), dtype=object)
 		self.prob_remaining = np.ndarray(shape=(9,9,8), dtype=object)
 		self.prob_s2 = np.ndarray(shape=(9,9,8), dtype=object)
+		self.prob_time = np.ndarray(shape=(9,9,8), dtype=object)
 		self.n = 0
 		self.std = 0
 		self.grid = grid
 		self.constraints = constrained
 		self.avg_reward = 0
-		self.total_transitions = 0
+		self.total_transitions_s1 = 0
+		self.total_transitions_s2 = 0
 		self.s1_wrong = 0
+		self.s1_wrong_list = []
+
+		self.s2_wrong = 0
+		self.s2_wrong_list = []
+
+		self.risk_aversion = risk_aversion
 
 		if demo != None:
 			for t in demo.trajectories:
@@ -58,22 +66,49 @@ class ModelSelf:
 		
 		return reward
 
-	def getPartialRemainingReward(self, trajectory, transition):
-		reward = 0.0
+	def getPartialRemainingReward(self, trajectory, index_start, time_stat):
+		'''reward = 0.0
 		reward = float("-inf")
 		find = False
-		for state in trajectory.transitions():
+
+		total_time = float("+inf")
+
+		for index, state in enumerate(trajectory.transitions()):
 			if (state == transition):
-				if not find: reward = 0.0
+				if not find: 
+					reward = 0.0
+					total_time = 0.0
 				find=True
-				
 
 			if find:
-				reward += self.constraints.reward[state]
-		
-		return reward
+				if self.constraints.reward[state] < -6:
+					reward += -abs(self.constraints.reward[state] ** (1+self.risk_aversion))
+				else:
+					reward += self.constraints.reward[state]
 
-	def updateModel(self, trajectory, traj_builders=None):
+				total_time += time_stat[index]'''
+
+		reward = 0.0
+		total_time = 0.0
+
+		
+
+		for index in range(index_start, len(trajectory.transitions())):
+			state = trajectory.transitions()[index]
+		
+			if self.constraints.reward[state] < -6:
+				reward += -abs(self.constraints.reward[state] ** (1+self.risk_aversion))
+			else:
+				reward += self.constraints.reward[state]
+
+			total_time += time_stat[index]
+		
+		total_time = total_time / (len(trajectory.transitions()) -  (index_start))
+		#print(f"index_start: {index_start} \t total_time: {total_time} \t len: {len(trajectory.transitions())} \n time: {time_stat} \n\n")
+
+		return reward, total_time 
+
+	def updateModel(self, trajectory, traj_builders=None, time_stat = None):
 		"""
 		Given a new trajectory, update the model of self.
 		"""
@@ -90,11 +125,13 @@ class ModelSelf:
 		temp_ntra_per_state_s2 = np.zeros((9, 9))
 		temp_prob_s2 = np.ndarray(shape=(9,9,8), dtype=object)
 
+		temp_prob_time = np.ndarray(shape=(9,9,8), dtype=object)
+
 		#self.total_transitions += len(trajectory.transitions())
 
 		i = 0
 		temp_partial_reward = 0
-		for transition in trajectory.transitions():
+		for index, transition in enumerate(trajectory.transitions()):
 
 			self.avg_reward += self.constraints.reward[transition]
 			#self.total_transitions += 1
@@ -102,11 +139,21 @@ class ModelSelf:
 			# if the action is computed by s1 and the reward is lower than the average reward
 			# s1 gets wrong
 			if traj_builders and traj_builders[i]==1:
-				self.total_transitions += 1
-				if self.constraints.reward[transition] < -4: #self.getAvgRewardPerTransition():
+				self.total_transitions_s1 += 1
+				if self.constraints.reward[transition] < -6: #self.getAvgRewardPerTransition():
 					self.s1_wrong += 1
+					self.s1_wrong_list.append(1)
+				else:
+					self.s1_wrong_list.append(0)
+			else:
+				self.total_transitions_s2 += 1
+				if self.constraints.reward[transition] < -6: #self.getAvgRewardPerTransition():
+					self.s2_wrong += 1
+					self.s2_wrong_list.append(1)
+				else:
+					self.s2_wrong_list.append(0)
 
-			total_reward = self.getPartialRemainingReward(trajectory, transition)
+			total_reward, total_time = self.getPartialRemainingReward(trajectory, index, time_stat = time_stat)
 			# print(state)
 			state_s = transition[0]
 			action = transition[1]
@@ -154,6 +201,19 @@ class ModelSelf:
 			if total_reward not in temp_prob[state_s_coord][action].keys(): 
 				temp_prob[state_s_coord][action][total_reward] = 1
 
+			#create the dictionary for probabilities
+			if not self.prob_time[state_s_coord][action]: 
+				self.prob_time[state_s_coord][action]={}
+				#self.prob[state_s_coord][action]['tot_trj'] = 0
+
+			#create the dictionary for probabilities
+			if not temp_prob_time[state_s_coord][action]: 
+				temp_prob_time[state_s_coord][action]={}
+				#self.prob[state_s_coord][action]['tot_trj'] = 0
+
+			if total_time not in temp_prob_time[state_s_coord][action].keys(): 
+				temp_prob_time[state_s_coord][action][total_time] = 1
+
 
 			if not self.prob_s2[state_s_coord][action]: 
 				self.prob_s2[state_s_coord][action]={}
@@ -176,6 +236,7 @@ class ModelSelf:
 
 		updateDict(temp_prob, self.prob)
 		updateDict(temp_prob_s2, self.prob_s2)
+		updateDict(temp_prob_time, self.prob_time)
 
 		self.ntra_per_transition  = self.ntra_per_transition  + temp_ntra_per_transition 
 		self.ntra_per_stateAction  = self.ntra_per_stateAction  + temp_ntra_per_stateAction 
@@ -287,6 +348,53 @@ class ModelSelf:
 
 		return exp_reward, confidence
 
+
+	def getExpTime(self, state_s, action, immediate = False, verbose=False):
+		"""
+		Given:
+		states: the actual position in the world
+		action: an action to be taken
+
+		Compute: 
+		reward as the probability that a trajectory from state 'state_s' takes action 'action' 
+		confidence as the ratio between the reward and the normalized standard deviation
+		"""
+		state_s_coord = self.grid.world.state_index_to_point(state_s)
+		#if (state,action) never appeared before then return -inf with the highest confidence
+		if not self.prob_time[state_s_coord][action]:
+			return float('+inf')
+
+		#print(f"{self.prob[state_s_coord][action]}")
+		if verbose: print(f"IMMEDIATE: {immediate}	S1 state: {state_s} \t action: {action} ")
+
+		'''
+		build the distribution of reward * prob where:
+			key is the reward and the dictionary value associated to the key is the number of traj
+			through state action with that reward
+		'''
+
+		temp_list = self.computeRewardsList(self.ntra_per_stateAction, self.prob_time, state_s, action, immediate=immediate, verbose=verbose)
+		
+		if verbose: print(f"action:{action} \n temp_list {temp_list} \t temp_ntra_per_stateAction {temp_ntra_per_stateAction}")
+		exp_time = np.sum(temp_list)
+		#temp_list = temp_list /exp_reward
+		#print(f"temp_list_norm: {temp_list/exp_reward}")
+		#print(f"state: {state_s} \t action: {action} \t {self.prob[state_s_coord][action]}")
+		if verbose: print(f"templist: {temp_list}\n")
+		#move_cell_trajectories = self.prob[state_s_coord][action]['tot_trj']
+		#print(f"move: {move_cell_trajectories}\t tot_trj {self.prob[state_s_coord][action]['tot_trj']}")
+		#trajectories_per_state = self.getNTrajectories(state_s)
+
+		#r = move_cell_trajectories / trajectories_per_state
+		#print(f"r_pre: {r}")
+		##r = self.ntra_per_stateAction[state_s_coord][action] / temp_ntra_per_stateAction
+		#print(f"r_post: {r}")
+		##temp_std = np.std(temp_list)
+
+		if verbose: print(f"exp_time: {exp_time}")
+
+		return exp_time
+
 	def getNTrajectories(self, state_s):
 		#return np.sum(self.ntra_per_transition[self.grid.world.state_index_to_point(state_s)])
 		return self.ntra_per_state[self.grid.world.state_index_to_point(state_s)]
@@ -313,8 +421,14 @@ class ModelSelf:
 		return self.avg_reward / self.total_transitions
 
 	def getM(self):
-		if  self.total_transitions ==0 : return 0
-		return self.s1_wrong / self.total_transitions
+		if  self.total_transitions_s1 ==0 : return 0
+		#return self.s1_wrong / self.total_transitions
+		return np.sum(self.s1_wrong_list[-201:-1]) / len(self.s1_wrong_list[-201:-1])
+
+	def getM2(self):
+		if  len(self.s2_wrong_list[-201:-1]) ==0 : return 0
+		#return self.s1_wrong / self.total_transitions
+		return np.sum(self.s2_wrong_list[-201:-1]) / len(self.s2_wrong_list[-201:-1])
 
 	def getAvgPartialRewardStateAction(self, state_s, action):
 		state_s_coord = self.grid.world.state_index_to_point(state_s)

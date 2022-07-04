@@ -12,7 +12,7 @@ from random import random
 class MCA:
 
 	def __init__(self, n=None, c=None, demo=None, s1=None, s2=None, modelSelf=None, threshold1=200, threshold2 = 0.8, \
-				threshold3 = 0.9, initial_time=0.3, threshold4 = 200, \
+				threshold3 = 0.9, initial_time=3, threshold4 = 200, \
 				threshold5 = 0, threshold6 = 1, threshold7 = 0.5, only_s1 = False, only_s2 = False, mixed= False):
 		assert(only_s1 != only_s2 or (not only_s1 and not only_s2 ))
 
@@ -116,8 +116,8 @@ class MCA:
 		while state != final:
 			s1_use = 1
 			engageS2 = False
-			action_thresholds = np.zeros(7)
-			action_thresholds_mask = np.zeros(7)
+			action_thresholds = np.zeros(8)
+			action_thresholds_mask = np.zeros(8)
 			if len(trajectory) > max_length:  # Reset and create a new trajectory
 				if trial >= 5:
 					print('Warning: terminated trajectory generation due to unreachable final state.')
@@ -164,8 +164,8 @@ class MCA:
 					action_thresholds[1] = float("-inf")
 
 
-				if self.modelSelf.total_transitions >= self.threshold4:
-					action_thresholds[2] = (1 - self.modelSelf.getM()) * confidence
+				if self.modelSelf.total_transitions_s1 >= self.threshold4:
+					action_thresholds[2] = min((1 - self.modelSelf.getM()), confidence)
 				else:
 					action_thresholds[2] = confidence
 
@@ -192,12 +192,14 @@ class MCA:
 					else:
 						expected_cost_s2 = float('+inf')
 
+					expected_cost_s1 = self.modelSelf.getExpTime(state, action)
+
 					expected_rew_move_s1 = self.modelSelf.getReward(state, action)[0]
-					expected_rew_move_s2 = self.modelSelf.getRewardS2(state, maxLike=True, verbose=False)
+					expected_rew_move_s2 = self.modelSelf.getRewardS2(state, maxLike=False, verbose=False)
 
 					action_thresholds[3] = expected_rew_move_s1
 					action_thresholds[4] = expected_rew_move_s2
-					action_thresholds[5] = expected_cost_s2
+					action_thresholds[5] = expected_cost_s2 #* (1 - self.threshold3)
 					if ( action_thresholds[5] <= 1):
 						#if (action_thresholds[3] - action_thresholds[4]) <= 0: 
 						#	action_thresholds_mask[3] = 1  					
@@ -217,17 +219,43 @@ class MCA:
 							max_rew = np.abs(max_rew_s2 - min_rew)
 							max_diff_rew = max(min_rew, max_rew)'''
 
-							discount = -1
-							if action_thresholds[4] >=0: discount = 1
+							discount_s2 = -1
+							if action_thresholds[4] >=0: discount_s2 = 1
 
-							if (action_thresholds[4] * (1 - discount * action_thresholds[5]) >= action_thresholds[3] * (1 - discount * self.threshold3)):
+							discount_s1 = -1
+							if action_thresholds[3] >=0: discount_s1 = 1
+
+							action_thresholds[7] = self.threshold3
+							if self.modelSelf.total_transitions_s1 >= self.threshold4:
+								action_thresholds[7] = self.modelSelf.getM()
+
+							count_errors=0
+							if self.modelSelf.total_transitions_s2 >= self.threshold4:
+								count_errors = self.modelSelf.getM2()
+
+							#if (action_thresholds[4] * (1 - discount_s2 * action_thresholds[5]) * (1 - discount_s2 * count_errors)) > (action_thresholds[3] * (1 - discount_s1 * action_thresholds[7])):
+							#if (action_thresholds[4] * (1 - discount_s2 * action_thresholds[5]) ) > action_thresholds[3] :	
+							#if (action_thresholds[4] * (1 - discount_s2 * action_thresholds[5]) ) > (action_thresholds[3] * (1 - discount_s1 * action_thresholds[7])):
+							#if (action_thresholds[4] > action_thresholds[3] ) and  ((1 - action_thresholds[5]) > (1 - action_thresholds[7])) and ((action_thresholds[4] * (1 - discount_s2 * action_thresholds[5]) ) > (action_thresholds[3] * (1 - discount_s1 * action_thresholds[7]))):
+							#if (action_thresholds[4] >= action_thresholds[3] ):# and ((action_thresholds[4] * (1 - discount_s2 * action_thresholds[5]) ) >= (action_thresholds[3] * (1 - discount_s1 * action_thresholds[7]))):
+							#print(f"{action_thresholds[3]}/{action_thresholds[4]} > {expected_time_s2}/{expected_cost_s1}")
+							if action_thresholds[3]<0: action_thresholds[3] = (-1)/action_thresholds[3]
+							if action_thresholds[4]<0: action_thresholds[4] = (-1)/action_thresholds[4]
+
+							if (action_thresholds[4]/action_thresholds[3] > pow((expected_time_s2/expected_cost_s1),(1-self.threshold3))):
 								action_thresholds_mask[6] = 1  		
 								engageS2 = True
+								#print(f"({action_thresholds[4]} * (1 - {discount} * {action_thresholds[5]})* (1 - {self.modelSelf.getM2()}) >= {action_thresholds[3]} * (1 - {discount} * {action_thresholds[7]}))")
 							#else:
 							#	print(f"({action_thresholds[4]} * (1 - {discount} * {action_thresholds[5]}) >= {action_thresholds[3]} * (1 - {discount} * {self.threshold3}))")
 
 							#engageS2 = True
 							#action_thresholds_mask[6] = 1 
+						else:
+							# THIS IS TO ENABLE EXPLORATORY PHASE ALSO ON S2 WITH 50% prob 
+							random_chance = random()
+							if random_chance >= 0.5: engageS2 = True
+
 					
 
 					'''action_thresholds[5] = self.modelSelf.getNTrajectoryStateS2(state)
@@ -394,7 +422,8 @@ class MCA:
 			return self.generate_trajectory()
 
 		list_tr = []
-		for _ in range(n):
+		for index in range(n):
+			#print(f"TRAJECTORY {index}")
 			if self.mixed and len(self.trajectory_stat)>=200:
 				self.only_s1 = True
 				self.only_s2 = False	
@@ -409,7 +438,7 @@ class MCA:
 				self.action_reward.append(temp_act_reward)
 				self.thresholds_stat.append(temp_thresholds_stat)'''
 			if result_traj[1] or not discard_not_feasable:
-				self.modelSelf.updateModel(result_traj[0], result_traj[2])
+				self.modelSelf.updateModel(result_traj[0], result_traj[2], time_stat = result_traj[3])
 				list_tr.append(result_traj[0])
 				self.trajectory_stat.append(result_traj[2])
 				self.time_stat.append(result_traj[3])

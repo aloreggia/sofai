@@ -1,15 +1,23 @@
 from tabnanny import verbose
 import numpy as np
+from random import random
 
 class System1Solver:
-	def __init__(self, myopic=False):
+	def __init__(self, myopic=False, random=False, ra=0.0):
 		super()
 		self.myopic = myopic
+		self.random = random
+		self.ra = ra
 
 	def policy(self, modelSelf, state):
 
 		#per ogni azione computa la probabilità che appartenga a una traiettoria positiva
 		#argmax prob dell'azione 
+
+		random_chance = random()
+
+		if random_chance > self.ra or self.random == True:
+			return np.random.choice(range(8)),0
 
 		list_Action = []
 		list_Confidence = []

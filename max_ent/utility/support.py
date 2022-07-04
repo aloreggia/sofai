@@ -8,7 +8,7 @@ import math
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvas
 from scipy.spatial import distance
-#import random
+import random as r
 import pickle
 from scipy import stats
 
@@ -22,7 +22,7 @@ from mc.system1 import *
 from mc.system2 import *
 from mc.mca import *
 
-def compute_mean(target = None):
+def compute_mean(target = None, demo = None, constraints = None):
 
     df = pd.DataFrame()
 
@@ -60,6 +60,20 @@ def compute_mean(target = None):
             reward_s1 = np.sum(selected_1)
             reward_s2 = np.sum(selected_2)
             
+            
+            violated_cs_1 = 0
+            violated_cs_2 = 0
+            violated_ca_1 = 0
+            violated_ca_2 = 2
+            if demo:
+                selected = np.array(demo.trajectories[i].transitions())
+                violated_cs_1= np.sum(np.isin(selected[mask_1][:,2], constraints['cs']))
+                violated_cs_2= np.sum(np.isin(selected[mask_2][:,2], constraints['cs']))
+                
+                ca = [x.idx for x in constraints['ca']]
+                violated_ca_1= np.sum(np.isin(selected[mask_1][:,1], ca))
+                violated_ca_2= np.sum(np.isin(selected[mask_2][:,1], ca))
+            
 
             dict_mca = {}
             dict_mca['traj_n'] = i
@@ -73,6 +87,7 @@ def compute_mean(target = None):
             dict_mca['reward_agent'] = reward_s1
             dict_mca['avg_reward'] = reward_s1 / usage_s1
             dict_mca['usage']= usage_s1
+            dict_mca['viol_constr']= violated_cs_1 + violated_ca_1
             dict_mca['perc_usage']= usage_s1 / len(target.trajectory_stat[i])
             temp_df = pd.DataFrame(data=dict_mca, index=[i])
             df = pd.concat([df, temp_df])
@@ -90,6 +105,7 @@ def compute_mean(target = None):
             dict_mca['reward_agent'] = reward_s2
             dict_mca['avg_reward'] = reward_s2 / usage_s2
             dict_mca['usage']= usage_s2
+            dict_mca['viol_constr']= violated_cs_2 + violated_ca_2
             dict_mca['perc_usage']= usage_s2 / len(target.trajectory_stat[i])
             
             temp_df = pd.DataFrame(data=dict_mca, index=[i])
@@ -168,7 +184,7 @@ def plot_results(df, x, y, min_label, max_label, bootstrap = 0):
     #plt.ylabel("Avg JS dist")
     plt.show()
     #fig.savefig(os.path.join("./", f"{y}_varying_{x}.png"), bbox_inches = 'tight')
-    fig.savefig(os.path.join("./", f"{y}.png"), bbox_inches = 'tight')
+    fig.savefig(os.path.join("./", f"{y}.pdf"), bbox_inches = 'tight')
 
 
 def conf_interval(array):
@@ -312,20 +328,22 @@ def count_states(trajectories, grid, nominal, constraints, bootstrap = 0, normal
 
 
 # check for distance between start and terminal states
-def generate_constraints(size):
+def generate_constraints(size, n_constraints=None):
 
     # generate the list of non-constrained states
     list_available = [x for x in range(size ** 2)]
 
-    blue = np.random.choice(list_available, 6)  # blue states
+    blue=[]
+    if not n_constraints: blue = np.random.choice(list_available, 6, replace = False)  # blue states
     # remove blue states from the list of non-constrained states
     list_available = np.setdiff1d(list_available, blue)
 
-    green = np.random.choice(list_available, 6)  # green states
+    green=[]
+    if not n_constraints: green = np.random.choice(list_available, 6, replace = False)  # green states
     # remove green states from the list of non-constrained states
     list_available = np.setdiff1d(list_available, green)
 
-    cs = np.random.choice(list_available, 6)  # constrained states
+    cs = np.random.choice(list_available, n_constraints, replace = False)  # constrained states
     # remove constrained states from the list of non-constrained states
     list_available = np.setdiff1d(list_available, cs)
 
@@ -334,16 +352,16 @@ def generate_constraints(size):
     # print(cs)
     # print(list_available)
 
-    random_ca = np.random.choice(8, 2)  # green states
+    random_ca = np.random.choice(8, 2, replace = False)  # green states
     ca = [Directions.ALL_DIRECTIONS[d] for d in random_ca]
     # print(ca)
 
     generate = True
     while generate:
         # generate start state from the list of non-constrained states
-        start = random.choice(list_available)
+        start = np.random.choice(list_available)
         # generate terminal state from the list of non-constrained states
-        goal = random.choice(list_available)
+        goal = np.random.choice(list_available)
 
         start_x = start % size
         start_y = start // size
@@ -564,7 +582,7 @@ def compute_statistics_grid(nominal_matrix, constrained_matrix, learned_matrix, 
 
     return dict_mdft
 
-def build_dict(temp_matrix, type_mca, agent=None, s1_usage=0,  t1=200, t2=0.8, t3=0, t4=0, t6=1, t7=0.5, bootstrap=0):
+def build_dict(temp_matrix = None, type_mca = None, agent=None, s1_usage=0,  t1=200, t2=0.8, t3=0, t4=0, t6=1, t7=0.5, bootstrap=0, demo =None, constraints = None):
     '''temp_dict={}
     temp_dict['type']= type_mca
     temp_dict['Length']= temp_matrix[1]
@@ -579,13 +597,20 @@ def build_dict(temp_matrix, type_mca, agent=None, s1_usage=0,  t1=200, t2=0.8, t
     temp_dict['t7'] = t7
     temp_df = pd.DataFrame(data=temp_dict, index=[0])'''
     
-    temp_df = compute_mean(agent)
+    temp_df = compute_mean(agent, demo, constraints)
     temp_df['type']= type_mca
-    temp_df['Length']= temp_matrix[1]
-    if agent == None: temp_df['length']= temp_matrix[1]
-    temp_df['Reward']= temp_matrix[2]
-    if agent == None: temp_df['reward']= temp_matrix[2]
-    temp_df['Viol'] = temp_matrix[4]
+    
+    if temp_matrix:
+        temp_df['Length']= temp_matrix[1]
+        if agent == None: temp_df['length']= temp_matrix[1]
+        temp_df['Reward']= temp_matrix[2]
+        if agent == None: temp_df['reward']= temp_matrix[2]
+        temp_df['Viol'] = temp_matrix[4]
+    else:
+        temp_df['Length']= np.mean(temp_df['length'])
+        temp_df['Reward']= np.mean(temp_df['reward'])
+        temp_df['Viol'] = np.mean(temp_df['viol_constr'])
+        
     temp_df['S1_Usage'] = s1_usage
     temp_df['t1'] = t1
     temp_df['t2'] = t2
