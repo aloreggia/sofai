@@ -23,7 +23,7 @@ class MCA:
 		else: self.s2 = System2Solver()
 
 		if modelSelf!= None: self.modelSelf = modelSelf
-		else: self.modelSelf = ModelSelf(n, c, demo)
+		else: self.modelSelf = ModelSelf(n, c, demo, risk_aversion = threshold3)
 
 		#print(f"threshold1: {threshold1}")
 		self.threshold1 = threshold1

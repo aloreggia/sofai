@@ -8,6 +8,7 @@ class System1Solver:
 		self.myopic = myopic
 		self.random = random
 		self.ra = ra
+		self.count_random = 0
 
 	def policy(self, modelSelf, state):
 
@@ -16,7 +17,8 @@ class System1Solver:
 
 		random_chance = random()
 
-		if random_chance > self.ra or self.random == True:
+		if random_chance > self.ra:
+			self.count_random += 1
 			return np.random.choice(range(8)),0
 
 		list_Action = []

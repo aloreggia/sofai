@@ -96,11 +96,15 @@ class ModelSelf:
 		for index in range(index_start, len(trajectory.transitions())):
 			state = trajectory.transitions()[index]
 		
+			#print(f"PRIMA {index}: {reward} {self.constraints.reward[state]} ** (1+{self.risk_aversion} ")
 			if self.constraints.reward[state] < -6:
-				reward += -abs(self.constraints.reward[state] ** (1+self.risk_aversion))
+				potenza = pow(abs(self.constraints.reward[state]), (1+self.risk_aversion))
+				reward = reward - abs(potenza)
 			else:
-				reward += self.constraints.reward[state]
+				potenza = 0
+				reward = reward + self.constraints.reward[state]
 
+			#print(f"DOPO {index}: {reward} {self.constraints.reward[state]} ** (1+{self.risk_aversion} = {potenza} \n\n")
 			total_time += time_stat[index]
 		
 		total_time = total_time / (len(trajectory.transitions()) -  (index_start))
@@ -479,7 +483,7 @@ class ModelSelf:
 				#for immediate ntra_per_stateAction == ntra_per_transition and prob == grid.reward
 				temp_list = ntra_per_stateAction[state_s_coord][action] * prob[state_s][action].reshape((self.grid.world.size,self.grid.world.size))
 				temp_list = temp_list / total_traj
-				#print(f"temp_list: {temp_list}")
+				if verbose: print(f"temp_list: {temp_list}")
 			else:
 				total_traj = 0
 				#Compute the total number of trajectories going trough state taking action
@@ -496,6 +500,7 @@ class ModelSelf:
 						temp_prob = prob[state_s_coord][action][key] / total_traj
 						temp_list.append(temp_reward * temp_prob)
 						if verbose: print(f"temp_reward * temp_prob {temp_reward , temp_prob} \t {prob[state_s_coord][action][key] , total_traj}")
+		
 		if verbose: print(f"temp_list {temp_list}\n")
 		return temp_list
 

@@ -197,7 +197,7 @@ def conf_interval(array):
 
 def create_world(title, blue, green, cs=[], ca=[], cc=[], start=0, goal=8, vmin=-50,
                  vmax=10, check=False, draw=True, n_trajectories=200):
-    n_cfg = G.config_world(blue, green, cs, ca, cc, goal, start=start)
+    n_cfg = G.config_world(blue, green, cs, ca, cc, goal, start=start,p_slip=0.1)
     n = n_cfg.mdp
     
     print(n.world.p_transition[0,0,:])
