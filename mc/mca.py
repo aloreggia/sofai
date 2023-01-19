@@ -212,12 +212,20 @@ class MCA:
 
 						if  action_thresholds[6] < (1 - (1 - self.threshold3)* 1E-2):
 							action_thresholds_mask[5] = 1
-							'''min_rew_s2, max_rew_s2 = self.modelSelf.getMinMaxPartialReward(state, s2 = True)
-							#print(f"min_rew_s2, max_rew_s2 {min_rew_s2, max_rew_s2}")
-							min_rew, max_rew = self.modelSelf.getMinMaxPartialReward(state)
-							min_rew = np.abs(min_rew_s2 - max_rew)
-							max_rew = np.abs(max_rew_s2 - min_rew)
-							max_diff_rew = max(min_rew, max_rew)'''
+							min_rew_s2, max_rew_s2 = self.modelSelf.getMinMaxPartialReward(state, s2 = True)
+							#print(f"**************************** \n min_rew_s2, max_rew_s2 {min_rew_s2, max_rew_s2}")
+							min_rew_s1, max_rew_s1 = self.modelSelf.getMinMaxPartialReward(state)
+							#print(f"min_rew_s1, max_rew_s1 {min_rew_s1, max_rew_s1}")
+							
+							min_rew = np.abs(min_rew_s2 - max_rew_s1)
+							#print(f"min_rew {min_rew}")
+							max_rew = np.abs(max_rew_s2 - min_rew_s1) + 1E-04
+							#print(f"max_rew {max_rew} \n **************************** \n ")
+							max_diff_rew = max(min_rew, max_rew)
+							if max_diff_rew == float("inf"): max_diff_rew = 1
+
+							#The other way round is less interesting since S2 is performing worst than S1
+							#max_diff_rew = max_rew
 
 							discount_s2 = -1
 							if action_thresholds[4] >=0: discount_s2 = 1
@@ -239,10 +247,16 @@ class MCA:
 							#if (action_thresholds[4] > action_thresholds[3] ) and  ((1 - action_thresholds[5]) > (1 - action_thresholds[7])) and ((action_thresholds[4] * (1 - discount_s2 * action_thresholds[5]) ) > (action_thresholds[3] * (1 - discount_s1 * action_thresholds[7]))):
 							#if (action_thresholds[4] >= action_thresholds[3] ):# and ((action_thresholds[4] * (1 - discount_s2 * action_thresholds[5]) ) >= (action_thresholds[3] * (1 - discount_s1 * action_thresholds[7]))):
 							#print(f"{action_thresholds[3]}/{action_thresholds[4]} > {expected_time_s2}/{expected_cost_s1}")
-							if action_thresholds[3]<0: action_thresholds[3] = (-1)/action_thresholds[3]
-							if action_thresholds[4]<0: action_thresholds[4] = (-1)/action_thresholds[4]
+							#if action_thresholds[3]<0: action_thresholds[3] = (-1)/action_thresholds[3]
+							#if action_thresholds[4]<0: action_thresholds[4] = (-1)/action_thresholds[4]
 
-							if (action_thresholds[4]/action_thresholds[3] > pow((expected_time_s2/expected_cost_s1),(1-self.threshold3))):
+							#if (action_thresholds[4]/action_thresholds[3] > pow((expected_time_s2/expected_cost_s1),(1-self.threshold3))):
+							delta_reward_norm = (action_thresholds[4] - action_thresholds[3])/max_diff_rew
+							total_cost = pow((1 + expected_cost_s2), (1 - self.threshold3)) - 1.1
+							
+							#print(f"{action_thresholds[4]} - {action_thresholds[3]}) / {max_diff_rew} > {expected_cost_s2}")
+
+							if ( delta_reward_norm >= total_cost):	
 								action_thresholds_mask[6] = 1  		
 								engageS2 = True
 								#print(f"({action_thresholds[4]} * (1 - {discount} * {action_thresholds[5]})* (1 - {self.modelSelf.getM2()}) >= {action_thresholds[3]} * (1 - {discount} * {action_thresholds[7]}))")
