@@ -13,21 +13,24 @@ class ModelSelf:
 	__part_reward: for each state, it keeps track of the cumulative partial reward to reach the state
 	__prob: for each pair (state, action), it keeps track of the probability of taking the action in the state
 	"""
-	def __init__(self, grid, constrained, demo, risk_aversion=1):
-		self.ntra_per_transition = np.zeros((9, 9, 8, 9, 9)) #* 1e-10
-		self.ntra_per_transition_s2 = np.zeros((9, 9, 8, 9, 9)) #* 1e-10
-		self.ntra_per_stateAction = np.zeros((9, 9, 8))
-		self.ntra_per_stateAction_s2 = np.zeros((9, 9, 8))
-		self.ntra_per_state = np.zeros((9, 9))
-		self.ntra_per_state_s2 = np.zeros((9, 9))
-		self.part_length = np.ndarray(shape=(9,9), dtype=object)
-		self.part_reward = np.zeros((9, 9)) 
-		self.part_reward_s2 = np.zeros((9, 9)) 
-		self.part_reward_state_action = np.zeros((9, 9, 8)) 
-		self.prob = np.ndarray(shape=(9,9,8), dtype=object)
-		self.prob_remaining = np.ndarray(shape=(9,9,8), dtype=object)
-		self.prob_s2 = np.ndarray(shape=(9,9,8), dtype=object)
-		self.prob_time = np.ndarray(shape=(9,9,8), dtype=object)
+	def __init__(self, grid, constrained, demo, risk_aversion=1, resetModelSelf=False):
+
+		size = grid.world.size
+
+		self.ntra_per_transition = np.zeros((size, size, 8, size, size)) #* 1e-10
+		self.ntra_per_transition_s2 = np.zeros((size, size, 8, size, size)) #* 1e-10
+		self.ntra_per_stateAction = np.zeros((size, size, 8))
+		self.ntra_per_stateAction_s2 = np.zeros((size, size, 8))
+		self.ntra_per_state = np.zeros((size, size))
+		self.ntra_per_state_s2 = np.zeros((size, size))
+		self.part_length = np.ndarray(shape=(size, size), dtype=object)
+		self.part_reward = np.zeros((size, size)) 
+		self.part_reward_s2 = np.zeros((size, size)) 
+		self.part_reward_state_action = np.zeros((size, size, 8)) 
+		self.prob = np.ndarray(shape=(size, size, 8), dtype=object)
+		self.prob_remaining = np.ndarray(shape=(size, size, 8), dtype=object)
+		self.prob_s2 = np.ndarray(shape=(size, size, 8), dtype=object)
+		self.prob_time = np.ndarray(shape=(size, size, 8), dtype=object)
 		self.n = 0
 		self.std = 0
 		self.grid = grid
@@ -41,11 +44,25 @@ class ModelSelf:
 		self.s2_wrong = 0
 		self.s2_wrong_list = []
 
+		self.trajectories = []
+
 		self.risk_aversion = risk_aversion
 
 		if demo != None:
 			for t in demo.trajectories:
 				self.updateModel(t)
+
+	def setGrid(self, grid):
+		self.grid = grid
+
+	def setConstraints(self, constraints):
+		self.constraints = constraints
+
+	def setStart(self, start):
+		self.grid.start[0] = start
+
+	def setTerminal(self, terminal):
+		self.grid.terminal[0] = terminal
 
 	def getStart(self):
 		return self.grid.start[0]
@@ -116,25 +133,27 @@ class ModelSelf:
 		"""
 		Given a new trajectory, update the model of self.
 		"""
+		size = self.grid.world.size
 		self.n +=1
 		total_reward = self.getTotalReward(trajectory)
 		#print(self.part_reward)
-		temp_ntra_per_transition = np.zeros((9, 9, 8, 9, 9))
-		temp_ntra_per_stateAction = np.zeros((9, 9, 8))
-		temp_ntra_per_state = np.zeros((9, 9))
-		temp_prob = np.ndarray(shape=(9,9,8), dtype=object)
+		temp_ntra_per_transition = np.zeros((size, size, 8, size, size))
+		temp_ntra_per_stateAction = np.zeros((size, size, 8))
+		temp_ntra_per_state = np.zeros((size, size))
+		temp_prob = np.ndarray(shape=(size, size, 8), dtype=object)
 
-		temp_ntra_per_transition_s2 = np.zeros((9, 9, 8, 9, 9))
-		temp_ntra_per_stateAction_s2 = np.zeros((9, 9, 8))
-		temp_ntra_per_state_s2 = np.zeros((9, 9))
-		temp_prob_s2 = np.ndarray(shape=(9,9,8), dtype=object)
+		temp_ntra_per_transition_s2 = np.zeros((size, size, 8, size, size))
+		temp_ntra_per_stateAction_s2 = np.zeros((size, size, 8))
+		temp_ntra_per_state_s2 = np.zeros((size, size))
+		temp_prob_s2 = np.ndarray(shape=(size, size, 8), dtype=object)
 
-		temp_prob_time = np.ndarray(shape=(9,9,8), dtype=object)
+		temp_prob_time = np.ndarray(shape=(size, size, 8), dtype=object)
 
 		#self.total_transitions += len(trajectory.transitions())
 
 		i = 0
 		temp_partial_reward = 0
+		self.trajectories.append(trajectory)
 		for index, transition in enumerate(trajectory.transitions()):
 
 			self.avg_reward += self.constraints.reward[transition]
@@ -236,21 +255,22 @@ class ModelSelf:
 			#self.prob[state_s_coord][action]['tot_trj'] += 1
 
 		#update the number of traj for the terminal state
-		temp_ntra_per_state[state_t_coord] += updateIfZero(temp_ntra_per_state[state_t_coord])
+		if trajectory.transitions():
+			temp_ntra_per_state[state_t_coord] += updateIfZero(temp_ntra_per_state[state_t_coord])
 
-		updateDict(temp_prob, self.prob)
-		updateDict(temp_prob_s2, self.prob_s2)
-		updateDict(temp_prob_time, self.prob_time)
+			updateDict(temp_prob, self.prob)
+			updateDict(temp_prob_s2, self.prob_s2)
+			updateDict(temp_prob_time, self.prob_time)
 
-		self.ntra_per_transition  = self.ntra_per_transition  + temp_ntra_per_transition 
-		self.ntra_per_stateAction  = self.ntra_per_stateAction  + temp_ntra_per_stateAction 
-		self.ntra_per_state  = self.ntra_per_state  + temp_ntra_per_state
+			self.ntra_per_transition  = self.ntra_per_transition  + temp_ntra_per_transition 
+			self.ntra_per_stateAction  = self.ntra_per_stateAction  + temp_ntra_per_stateAction 
+			self.ntra_per_state  = self.ntra_per_state  + temp_ntra_per_state
 
-		self.ntra_per_transition_s2  = self.ntra_per_transition_s2  + temp_ntra_per_transition_s2
-		self.ntra_per_stateAction_s2  = self.ntra_per_stateAction_s2  + temp_ntra_per_stateAction_s2 
-		self.ntra_per_state_s2  = self.ntra_per_state_s2  + temp_ntra_per_state_s2
+			self.ntra_per_transition_s2  = self.ntra_per_transition_s2  + temp_ntra_per_transition_s2
+			self.ntra_per_stateAction_s2  = self.ntra_per_stateAction_s2  + temp_ntra_per_stateAction_s2 
+			self.ntra_per_state_s2  = self.ntra_per_state_s2  + temp_ntra_per_state_s2
 
-		self.std = np.std(self.ntra_per_transition  / np.sum(self.ntra_per_transition))
+			self.std = np.std(self.ntra_per_transition  / np.sum(self.ntra_per_transition))
 
 	def getRewardS2(self, state_s, verbose=False, maxLike = False):
 		"""

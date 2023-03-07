@@ -1,8 +1,11 @@
 from max_ent.gridworld import Directions
-import max_ent.examples.grid_9_by_9 as G
+#import max_ent.examples.grid_9_by_9 as G
+import max_ent.examples.grid_n_by_n as G
 import seaborn as sns
 import numpy as np
 import pandas as pd
+
+import matplotlib.gridspec as gridspec
 
 import math
 import matplotlib.pyplot as plt
@@ -22,13 +25,21 @@ from mc.system1 import *
 from mc.system2 import *
 from mc.mca import *
 
-def compute_mean(target = None, demo = None, constraints = None):
+def compute_mean(target = None, demo = None, constraints = None, number = None, n_trajectories=None):
 
     df = pd.DataFrame()
 
     if target: 
-
-        for i in range(0, len(target.time_stat)):
+            
+        if number:
+            initial = n_trajectories*number
+            terminal = initial + n_trajectories
+        else:
+            initial = 0 
+            terminal = len(target.time_stat)
+            if n_trajectories: terminal = n_trajectories
+            
+        for i in range(initial, terminal):
             #print(f"Stat: {mca.trajectory_stat[i]}")
             mask_1 = np.array(target.trajectory_stat[i]) == 1
             mask_2 = np.array(target.trajectory_stat[i]) == 0
@@ -66,7 +77,14 @@ def compute_mean(target = None, demo = None, constraints = None):
             violated_ca_1 = 0
             violated_ca_2 = 2
             if demo:
-                selected = np.array(demo.trajectories[i].transitions())
+                selected = np.array(demo.trajectories[i - n_trajectories*number].transitions())
+                #print(f"\n ============= {i} in [{initial}, {terminal}]============")
+                
+                '''print(f"\n ============= {i} ============")
+                print(f"selected: {selected}")
+                print(f"mask_1: {mask_1}")
+                print(f"selected[mask_1]: {selected[mask_1]}")
+                print(f"constraints['cs']: {constraints['cs']}")'''
                 violated_cs_1= np.sum(np.isin(selected[mask_1][:,2], constraints['cs']))
                 violated_cs_2= np.sum(np.isin(selected[mask_2][:,2], constraints['cs']))
                 
@@ -276,11 +294,12 @@ def js_divergence(p, q):
 
 def count_states(trajectories, grid, nominal, constraints, bootstrap = 0, normalize = True, avoid_impossible = False):
     #grid = world.mdp
-    count_matrix = np.ones((9, 9, 8, 9, 9)) * 1e-10
+    size = grid.world.size
+    count_matrix = np.ones((size, size, 8, size, size)) * 1e-10
     #count_matrix = np.zeros((9, 9, 8, 9, 9))
     impossible_moves = 0
     total_transitions = 0
-    if not normalize: count_matrix = np.zeros((9, 9, 8, 9, 9))
+    if not normalize: count_matrix = np.zeros((size, size, 8, size, size))
     avg_length = 0.0
     avg_reward = 0.0
     avg_reward_n = 0.0
@@ -328,10 +347,11 @@ def count_states(trajectories, grid, nominal, constraints, bootstrap = 0, normal
 
 
 # check for distance between start and terminal states
-def generate_constraints(size, n_constraints=None):
+def generate_constraints(size, n_constraints=None, goal=-1, action=2):
 
     # generate the list of non-constrained states
     list_available = [x for x in range(size ** 2)]
+    if goal>=0: list_available.remove(goal) 
 
     blue=[]
     if not n_constraints: blue = np.random.choice(list_available, 6, replace = False)  # blue states
@@ -352,7 +372,7 @@ def generate_constraints(size, n_constraints=None):
     # print(cs)
     # print(list_available)
 
-    random_ca = np.random.choice(8, 2, replace = False)  # green states
+    random_ca = np.random.choice(8, action, replace = False)  # green states
     ca = [Directions.ALL_DIRECTIONS[d] for d in random_ca]
     # print(ca)
 
@@ -361,7 +381,9 @@ def generate_constraints(size, n_constraints=None):
         # generate start state from the list of non-constrained states
         start = np.random.choice(list_available)
         # generate terminal state from the list of non-constrained states
-        goal = np.random.choice(list_available)
+        if goal<0: goal = np.random.choice(list_available)
+            
+        #print(f"GOAL: {goal}")
 
         start_x = start % size
         start_y = start // size
@@ -369,7 +391,7 @@ def generate_constraints(size, n_constraints=None):
         goal_x = goal % size
         goal_y = goal // size
 
-        if abs(start_x-goal_x) > 2 or abs(start_y-goal_y) > 2:
+        if abs(start_x-goal_x) > 0 or abs(start_y-goal_y) > 0:
             generate = False
 
     return blue, green, cs, ca, start, goal
@@ -582,7 +604,7 @@ def compute_statistics_grid(nominal_matrix, constrained_matrix, learned_matrix, 
 
     return dict_mdft
 
-def build_dict(temp_matrix = None, type_mca = None, agent=None, s1_usage=0,  t1=200, t2=0.8, t3=0, t4=0, t6=1, t7=0.5, bootstrap=0, demo =None, constraints = None):
+def build_dict(temp_matrix = None, type_mca = None, agent=None, s1_usage=0,  t1=200, t2=0.8, t3=0, t4=0, t6=1, t7=0.5, bootstrap=0, demo =None, constraints = None, n_grid=0, n_trajectories=None, trial=0):
     '''temp_dict={}
     temp_dict['type']= type_mca
     temp_dict['Length']= temp_matrix[1]
@@ -597,7 +619,8 @@ def build_dict(temp_matrix = None, type_mca = None, agent=None, s1_usage=0,  t1=
     temp_dict['t7'] = t7
     temp_df = pd.DataFrame(data=temp_dict, index=[0])'''
     
-    temp_df = compute_mean(agent, demo, constraints)
+    temp_df = compute_mean(agent, demo, constraints, number = trial, n_trajectories=n_trajectories)
+    temp_df['grid'] = n_grid
     temp_df['type']= type_mca
     
     if temp_matrix:
@@ -704,3 +727,163 @@ def simulation(n_cfg, c_cfg, demo, demo_mca_s1, demo_mca_s2, mca_s1, mca_s2, con
     jsdiv = pd.concat([jsdiv, temp_jsdiv])
                             
     return df, jsdiv
+
+def plot_subtype(x, y, df, hue, title, filename, min_label=0, max_label=None, list_threshold3= None, dropna = False):
+    
+    print(f"{[min_label, max_label]}")
+    sns.set(rc={'figure.figsize':(11.7,8.27)})
+    sns.set_theme(style="whitegrid")
+    sns.set(font_scale=2)
+    sns.color_palette("viridis", as_cmap=True)
+    
+    fig = plt.figure(figsize=(60, 30))
+    # grid for pairs of subplots
+    rows = len(list_threshold3)
+    cols = 5
+    grid = plt.GridSpec(rows, cols)
+
+    #figure, axis = plt.subplots(len(list_threshold3), 2, figsize=(25, 30))
+    #plt.tight_layout()
+    #print(axis)
+
+    #for index, t3, sub_plot in enumerate(list_threshold3,axis):
+    for i in range(rows):
+        
+        t3 = list_threshold3[i]
+        # create fake subplot just to title set of subplots
+        fake = fig.add_subplot(grid[i, :])
+        # '\n' is important
+        fake.set_title(f'{title+str(t3)}\n', fontweight='semibold')
+        fake.set_axis_off()
+        
+        # create subgrid for two subplots without space between them
+        # <https://matplotlib.org/2.0.2/users/gridspec.html>
+        gs = gridspec.GridSpecFromSubplotSpec(1, cols, subplot_spec=grid[i, :])
+
+        # real subplot #1
+        ax = fig.add_subplot(gs[0])
+        ax.set_title(f'Det. = 0.0')
+        temp_df = df.loc[(df['traj_n']>=0) & (df['t3']==t3) & ((df['type']=='SOFAI w/ S1 ra=0.0') )  ] #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['s1','s2'], hue=hue,markers=True, dashes=False)
+        if max_label: g.set_ylim([min_label, max_label])
+        #axis[0,0].set_title('Myopic')'''
+
+        # real subplot #2
+        ax = fig.add_subplot(gs[1], sharey=ax)
+        ax.set_title(f'Det. = 0.25')
+        temp_df = df.loc[(df['traj_n']>=0) & (df['t3']==t3) &  ((df['type']=='SOFAI w/ S1 ra=0.25') )  ] #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['s1','s2'], hue=hue,markers=True, dashes=False)
+        if max_label: g.set_ylim([min_label, max_label])
+        #axis[0,1].set_title('No Myopic')
+        
+        # real subplot #2
+        ax = fig.add_subplot(gs[2], sharey=ax)
+        ax.set_title(f'Det. = 0.5')
+        temp_df = df.loc[(df['traj_n']>=0) & (df['t3']==t3) &  ((df['type']=='SOFAI w/ S1 ra=0.5') )  ] #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['s1','s2'], hue=hue,markers=True, dashes=False)
+        if max_label: g.set_ylim([min_label, max_label])
+            
+        # real subplot #2
+        ax = fig.add_subplot(gs[3], sharey=ax)
+        ax.set_title(f'Det. = 0.75')
+        temp_df = df.loc[(df['traj_n']>=0) & (df['t3']==t3) &  ((df['type']=='SOFAI w/ S1 ra=0.75') )  ] #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        #g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['s1','s2'], ci=None, hue=hue,markers=True, dashes=False)
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['s1','s2'], hue=hue,markers=True, dashes=False)
+        if max_label: g.set_ylim([min_label, max_label])
+            
+        # real subplot #2
+        ax = fig.add_subplot(gs[4], sharey=ax)
+        ax.set_title(f'Det. = 1.0')
+        temp_df = df.loc[(df['traj_n']>=0) & (df['t3']==t3) &  ((df['type']=='SOFAI w/ S1 ra=1.0') )  ] #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['s1','s2'], hue=hue,markers=True, dashes=False)
+        if max_label: g.set_ylim([min_label, max_label])
+
+    plt.savefig(filename+'.pdf')
+    plt.show()
+
+def plot_type(x, y, df, hue, title, filename, min_label=0, max_label=None, list_threshold3= None, dropna=False):
+         
+    ci=None
+    #print(f"{[min_label, max_label]}")
+    sns.set(rc={'figure.figsize':(11.7,8.27)})
+    sns.set_theme(style="whitegrid")
+    sns.set(font_scale=2)
+    sns.color_palette("viridis", as_cmap=True)
+    
+    fig = plt.figure(figsize=(60, 30))
+    # grid for pairs of subplots
+    rows = len(list_threshold3)
+    cols = 5
+    grid = plt.GridSpec(rows, cols)
+    #print(df['type'])
+
+    #figure, axis = plt.subplots(len(list_threshold3), 2, figsize=(25, 30))
+    #plt.tight_layout()
+    #print(axis)
+
+    #for index, t3, sub_plot in enumerate(list_threshold3,axis):
+    for i in range(rows):
+        
+        t3 = list_threshold3[i]
+        # create fake subplot just to title set of subplots
+        fake = fig.add_subplot(grid[i, :])
+        # '\n' is important
+        fake.set_title(f'{title+str(t3)}\n', fontweight='semibold')
+        fake.set_axis_off()
+        
+        # create subgrid for two subplots without space between them
+        # <https://matplotlib.org/2.0.2/users/gridspec.html>
+        gs = gridspec.GridSpecFromSubplotSpec(1, cols, subplot_spec=grid[i, :])
+
+        # real subplot #1
+        ax = fig.add_subplot(gs[0])
+        ax.set_title(f'Det. = 0.0')
+        temp_df = df.loc[(df['traj_n']>=0) & (((df['t3']==t3) & (df['type']=='SOFAI w/ S1 ra=0.0')) | (df['t3']==0))].dropna() #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['S2', 'SOFAI w/ S1 ra=0.0'], hue=hue,markers=True, dashes=False)
+        plt.legend(labels=['S2', 'SOFAI'])
+        if max_label: g.set_ylim([min_label, max_label])
+        #axis[0,0].set_title('Myopic')'''
+
+        # real subplot #2
+        ax = fig.add_subplot(gs[1], sharey=ax)
+        ax.set_title(f'Det. = 0.25')
+        temp_df = df.loc[(df['traj_n']>=0) & (((df['t3']==t3) & (df['type']=='SOFAI w/ S1 ra=0.25')) | (df['t3']==0))].dropna() #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['S2', 'SOFAI w/ S1 ra=0.25'], hue=hue,markers=True, dashes=False)
+        plt.legend(labels=['S2', 'SOFAI'])
+        if max_label: g.set_ylim([min_label, max_label])
+            
+        ax = fig.add_subplot(gs[2], sharey=ax)
+        ax.set_title(f'Det. = 0.5')
+        temp_df = df.loc[(df['traj_n']>=0) & (((df['t3']==t3) & (df['type']=='SOFAI w/ S1 ra=0.5')) | (df['t3']==0))].dropna() #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['S2', 'SOFAI w/ S1 ra=0.5'], hue=hue,markers=True, dashes=False)
+        plt.legend(labels=['S2', 'SOFAI'])
+        if max_label: g.set_ylim([min_label, max_label])
+            
+        ax = fig.add_subplot(gs[3], sharey=ax)
+        ax.set_title(f'Det. = 0.75')
+        temp_df = df.loc[(df['traj_n']>=0) & (((df['t3']==t3) & (df['type']=='SOFAI w/ S1 ra=0.75')) | (df['t3']==0))].dropna() #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['S2', 'SOFAI w/ S1 ra=0.75'], hue=hue,markers=True, dashes=False)
+        plt.legend(labels=['S2', 'SOFAI'])
+        if max_label: g.set_ylim([min_label, max_label])
+            
+        ax = fig.add_subplot(gs[4], sharey=ax)
+        ax.set_title(f'Det. = 1.0')
+        temp_df = df.loc[(df['traj_n']>=0) & (((df['t3']==t3) & (df['type']=='SOFAI w/ S1 ra=1.0')) | (df['t3']==0))].dropna() #| (df['type']=='s1_nb') 
+        if dropna : temp_df = temp_df.dropna()
+        g=sns.lineplot(ax=ax, x=x, y=y, data=temp_df, hue_order=['S2', 'SOFAI w/ S1 ra=1.0'], hue=hue,markers=True, dashes=False)
+        plt.legend(labels=['S2', 'SOFAI'])
+        if max_label: g.set_ylim([min_label, max_label])
+        #axis[0,1].set_title('No Myopic')
+
+    plt.savefig(filename+'.pdf')
+    plt.show()
+

@@ -1,7 +1,9 @@
 import numpy as np
 from torch import threshold
+import math
 from max_ent.gridworld.trajectory import Trajectory
 from max_ent.algorithms.gridworld_icrl import Demonstration
+from scipy.spatial import distance
 import time
 from mc.self import *
 from mc.system1 import *
@@ -12,7 +14,7 @@ from random import random
 class MCA:
 
 	def __init__(self, n=None, c=None, demo=None, s1=None, s2=None, modelSelf=None, threshold1=200, threshold2 = 0.8, \
-				threshold3 = 0.9, initial_time=3, threshold4 = 200, \
+				threshold3 = 0.9, initial_time=30, threshold4 = 200, \
 				threshold5 = 0, threshold6 = 1, threshold7 = 0.5, only_s1 = False, only_s2 = False, mixed= False):
 		assert(only_s1 != only_s2 or (not only_s1 and not only_s2 ))
 
@@ -57,10 +59,20 @@ class MCA:
 		self.only_s2 = only_s2
 		self.max_time_s2 = float("-inf")
 
+		self.temperature = 1.0
+
 		self.mixed = mixed
 		if self.mixed: 
 			self.only_s1 = False
 			self.only_s2 = True
+
+	def setGrid(self, grid, constraints):
+		self.modelSelf.setGrid(grid)
+		self.modelSelf.setConstraints(constraints)
+
+	def setStartTerminal(self, start, terminal):
+		self.modelSelf.setStart(start)
+		self.modelSelf.setTerminal(terminal)
 
 	def getStatistics(self, verbose=False):
 		'''
@@ -122,6 +134,7 @@ class MCA:
 				if trial >= 5:
 					print('Warning: terminated trajectory generation due to unreachable final state.')
 					return Trajectory(trajectory), False, trajectory_builder, time_builder, act_reward, temp_thresholds_stat, temp_thresholds_mask
+					#return Trajectory([]), False, [], [], [], [], []
 				trajectory = []
 				trajectory_builder = []
 				time_builder = []
@@ -252,7 +265,13 @@ class MCA:
 
 							#if (action_thresholds[4]/action_thresholds[3] > pow((expected_time_s2/expected_cost_s1),(1-self.threshold3))):
 							delta_reward_norm = (action_thresholds[4] - action_thresholds[3])/max_diff_rew
-							total_cost = pow((1 + expected_cost_s2), (1 - self.threshold3)) - 1.1
+							total_cost = pow((1 + expected_cost_s2), (1 - self.threshold3)) - 1
+
+							#delta_reward_norm = (action_thresholds[3] / action_thresholds[4])
+							#if (action_thresholds[3]<0) and (action_thresholds[4]>0):
+							#	delta_reward_norm = (action_thresholds[4] * np.abs(action_thresholds[3]))
+							#total_cost = (1 - self.threshold3) / (1 - expected_cost_s2 + 1E-3)
+							#total_cost = expected_cost_s2 / (self.threshold3)
 							
 							#print(f"{action_thresholds[4]} - {action_thresholds[3]}) / {max_diff_rew} > {expected_cost_s2}")
 
@@ -364,6 +383,7 @@ class MCA:
 			next_s = range(self.modelSelf.getNStates())
 			next_p = self.modelSelf.getWorld().p_transition[state, :, action]
 
+			#print(f"State {state} Action {action} NEXT_p {next_p}")
 			next_state = np.random.choice(next_s, p=next_p)
 
 			transition = (state, action, next_state)
@@ -461,3 +481,150 @@ class MCA:
 				self.thresholds_mask.append(result_traj[6])
 		
 		return Demonstration(list_tr, self.s1.policy)
+	
+	def reflect(self, p=0.2, verbose=False, max_length = 200, threshold_delta = -0.2):
+
+		#compute indexes for the portion of trajectories to be recomputed
+		final = len(self.trajectory_stat)
+		p =  min(1, abs(p))
+		initial = (int) (final - final * p)
+		print(f"{initial, final}")
+
+		new_trajectories = []
+		new_rewards = []
+		new_times = []
+		improvements = []
+		modified = []
+
+		for trajectory_index in range(initial, final):
+			if verbose: print(f"trajectory_index {trajectory_index}")
+			#check if any action of the trajectory was computed by S1
+			start_cell = np.where(np.array(self.trajectory_stat[trajectory_index])==1)
+			if verbose: print(f"self.trajectory_stat[trajectory_index] {self.trajectory_stat[trajectory_index]}")
+
+			index_state = len(self.trajectory_stat[trajectory_index])
+			state = self.modelSelf.trajectories[trajectory_index].transitions()[index_state-1][2]
+
+			if len(start_cell[0])>0: 
+				index_state=start_cell[0][0]
+				state = self.modelSelf.trajectories[trajectory_index].transitions()[index_state][0]
+				modified.append(1)
+			else:
+				modified.append(0)
+				
+			if verbose: print(f"state {state} in index {index_state}")
+				
+			#copy previous trajectory info up to the first action computed by S1
+			temp_trajectory = list(np.copy(self.modelSelf.trajectories[trajectory_index].transitions()[:index_state]))
+			if verbose: print(f"Before Trajectory {temp_trajectory}")
+			temp_reward = list(np.copy(self.action_reward[trajectory_index][:index_state]))
+			temp_time = list(np.copy(self.time_stat[trajectory_index][:index_state]))
+
+			trial = 0
+			while state != self.modelSelf.getGoal():
+
+				if len(temp_trajectory) > max_length:  # Reset and create a new trajectory
+					trial += 1
+					temp_trajectory = list(np.copy(self.modelSelf.trajectories[trajectory_index].transitions()[:index_state]))
+					temp_reward = list(np.copy(self.action_reward[trajectory_index][:index_state]))
+					temp_time = list(np.copy(self.time_stat[trajectory_index][:index_state]))
+					print(f"Warning trajectory too long")
+					if trial >= 5:
+						#if failed to computed a new traj then copy old info
+						print(f"Failed to improve, keeping the original trajectory")
+						temp_trajectory = list(np.copy(self.modelSelf.trajectories[trajectory_index].transitions()))
+						temp_reward = list(np.copy(self.action_reward[trajectory_index]))
+						temp_time = list(np.copy(self.time_stat[trajectory_index]))
+						break
+
+				w = [0,1]
+				if self.threshold5 == 1: 
+					x = 0.0
+					expected_avg_length = self.modelSelf.getAvgPartialLength(state) 
+					#print(f"{expected_avg_length}")
+					current_length = len(temp_trajectory)
+					if expected_avg_length >= current_length:
+						min_len, max_len = self.modelSelf.getMinMaxPartialLength(state)
+						if min_len != None and max_len != None:
+							min_len = np.abs(current_length - min_len)
+							max_len = np.abs(current_length - max_len)
+							max_diff_len = max(min_len, max_len)
+							x = np.abs(current_length - expected_avg_length) / max_diff_len
+					x = min(1.0,x)
+					w = [x, 1-x]
+
+				time_exp = int(round(time.time() * 1000))
+				action = self.s2.policy(self.modelSelf, state, w)
+				time_exp = int(round(time.time() * 1000)) - time_exp
+
+				next_s = range(self.modelSelf.getNStates())
+				next_p = self.modelSelf.getWorld().p_transition[state, :, action]
+
+				#print(f"State {state} Action {action} NEXT_p {next_p}")
+				next_state = np.random.choice(next_s, p=next_p)
+
+				transition = (state, action, next_state)
+				#print(f"transition {transition}")
+				temp_trajectory.append(transition)
+				temp_reward.append(self.modelSelf.constraints.reward[transition])
+				temp_time.append(time_exp)
+				
+
+				state = next_state
+
+			if verbose: 
+				print("=============================================")
+				print(f"Old Trajectory {self.modelSelf.trajectories[trajectory_index]}")
+				print(f"Old Reward {self.action_reward[trajectory_index]}")
+				print(f"New Trajectory {temp_trajectory}")
+				print(f"New Reward {temp_reward}")
+				print(f"Old Rew {np.sum(self.action_reward[trajectory_index])} vs New Rew {np.sum(temp_reward)}")
+				print("=============================================")
+
+			if np.sum(self.action_reward[trajectory_index]) < np.sum(temp_reward): 
+				improvements.append(1)
+			else:
+				improvements.append(0)
+
+			new_trajectories.append(Trajectory(temp_trajectory))
+			new_rewards.append(temp_reward)
+			new_times.append(temp_time)
+
+		values_new = []
+		values = []
+		delta = []
+		epsilon = 1E-9
+		for i in range(initial, initial+len(new_rewards)):
+			'''if r[3][i]:
+				values_new.append((sum(r[1][i])))#/(len(r[1][i])*168)))
+			else:
+				values_new.append((sum(mca.action_reward[i])))#/sum(mca.time_stat[i])))'''
+			values.append(-sum(self.action_reward[i])*sum(self.time_stat[i]))
+			values_new.append(-sum(new_rewards[i])*sum(new_times[i]))
+			#print(f"{values[-1],values_new[-1]}")
+			delta.append(math.log(values[-1]+epsilon,2) - math.log(values_new[-1]+epsilon,2))
+
+		compare_traj = np.array(self.modelSelf.trajectories[initial:final])[np.where(np.array(delta)< threshold_delta)[0]]
+		compare_traj = np.concatenate((np.array(new_trajectories)[np.where(np.array(delta)>= threshold_delta)[0]], compare_traj), axis=0)
+
+
+		size = self.modelSelf.grid.world.size
+		epsilon = + 1E-4
+		origTraj = np.zeros((size * size, 8, size * size)) + epsilon
+		for trajectory in self.modelSelf.trajectories[initial: final]:
+			#total += len(trajectory.transitions())
+			for transition in trajectory.transitions():
+				origTraj[transition] += 1	
+		origTraj = origTraj / sum(np.reshape(origTraj, (-1,)))
+
+		newtraj = np.zeros((size * size, 8, size * size)) + epsilon
+		for trajectory in new_trajectories:
+			for transition in trajectory.transitions():
+				newtraj[tuple(transition)] += 1	
+		newtraj = newtraj / sum(np.reshape(newtraj, (-1,)))
+
+		self.temperature = distance.jensenshannon(np.reshape(newtraj, (-1,)),np.reshape(origTraj, (-1,)))
+
+		return new_trajectories, new_rewards, new_times, improvements, modified
+
+					
