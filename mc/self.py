@@ -17,6 +17,8 @@ class ModelSelf:
 
 		size = grid.world.size
 
+		self.MAX_PENALTY = -10000
+
 		self.ntra_per_transition = np.zeros((size, size, 8, size, size)) #* 1e-10
 		self.ntra_per_transition_s2 = np.zeros((size, size, 8, size, size)) #* 1e-10
 		self.ntra_per_stateAction = np.zeros((size, size, 8))
@@ -81,6 +83,9 @@ class ModelSelf:
 		for state in trajectory.transitions():
 			reward += self.constraints.reward[state]
 		
+		#if the trajectory is incomplete, than apply MAX_PENALTY	
+		if trajectory.transitions()[-1][2] != self.getGoal():
+			reward += self.MAX_PENALTY
 		return reward
 
 	def getPartialRemainingReward(self, trajectory, index_start, time_stat):
@@ -124,6 +129,9 @@ class ModelSelf:
 			#print(f"DOPO {index}: {reward} {self.constraints.reward[state]} ** (1+{self.risk_aversion} = {potenza} \n\n")
 			total_time += time_stat[index]
 		
+		if trajectory.transitions()[-1][2] != self.getGoal():
+			reward += self.MAX_PENALTY
+
 		total_time = total_time / (len(trajectory.transitions()) -  (index_start))
 		#print(f"index_start: {index_start} \t total_time: {total_time} \t len: {len(trajectory.transitions())} \n time: {time_stat} \n\n")
 
@@ -159,6 +167,17 @@ class ModelSelf:
 			self.avg_reward += self.constraints.reward[transition]
 			#self.total_transitions += 1
 
+			# print(state)
+			state_s = transition[0]
+			action = transition[1]
+			state_t = transition[2]
+
+			#compute the coordinates for initial and final state
+			state_s_coord = self.grid.world.state_index_to_point(state_s)
+			state_t_coord = self.grid.world.state_index_to_point(state_t)
+
+			total_reward, total_time = self.getPartialRemainingReward(trajectory, index, time_stat = time_stat)
+
 			# if the action is computed by s1 and the reward is lower than the average reward
 			# s1 gets wrong
 			if traj_builders and traj_builders[i]==1:
@@ -170,21 +189,19 @@ class ModelSelf:
 					self.s1_wrong_list.append(0)
 			else:
 				self.total_transitions_s2 += 1
+				#create the dictionary for probabilities
+				if not temp_prob_s2[state_s_coord][action]: 
+					temp_prob_s2[state_s_coord][action]={}
+					#self.prob[state_s_coord][action]['tot_trj'] = 0
+
+				if total_reward not in temp_prob_s2[state_s_coord][action].keys():
+					temp_prob_s2[state_s_coord][action][total_reward] = 1
+
 				if self.constraints.reward[transition] < -6: #self.getAvgRewardPerTransition():
 					self.s2_wrong += 1
 					self.s2_wrong_list.append(1)
 				else:
 					self.s2_wrong_list.append(0)
-
-			total_reward, total_time = self.getPartialRemainingReward(trajectory, index, time_stat = time_stat)
-			# print(state)
-			state_s = transition[0]
-			action = transition[1]
-			state_t = transition[2]
-
-			#compute the coordinates for initial and final state
-			state_s_coord = self.grid.world.state_index_to_point(state_s)
-			state_t_coord = self.grid.world.state_index_to_point(state_t)
 
 			#update the number of traj for the transition
 			temp_ntra_per_transition[state_s_coord][action][state_t_coord] += updateIfZero(temp_ntra_per_transition[state_s_coord][action][state_t_coord])
@@ -241,14 +258,6 @@ class ModelSelf:
 			if not self.prob_s2[state_s_coord][action]: 
 				self.prob_s2[state_s_coord][action]={}
 				#self.prob[state_s_coord][action]['tot_trj'] = 0
-
-			#create the dictionary for probabilities
-			if not temp_prob_s2[state_s_coord][action]: 
-				temp_prob_s2[state_s_coord][action]={}
-				#self.prob[state_s_coord][action]['tot_trj'] = 0
-
-			if total_reward not in temp_prob_s2[state_s_coord][action].keys(): 
-				temp_prob_s2[state_s_coord][action][total_reward] = 1
 
 			#print(f"i: {i}")
 			i += 1
@@ -430,7 +439,7 @@ class ModelSelf:
 	def getAvgPartialReward(self, state_s):
 		state_s_coord = self.grid.world.state_index_to_point(state_s)
 		#print(f"part_reward: {self.part_reward[state_s_coord]} \t tot_traj: {np.sum(self.ntra_per_transition[state_s_coord])}")
-		if self.getNTrajectories(state_s) == 0: return 1
+		if self.getNTrajectories(state_s) == 0: return 0
 		return self.part_reward[state_s_coord] / self.getNTrajectories(state_s)
 
 	def getAvgPartialLength(self, state_s):
@@ -507,14 +516,16 @@ class ModelSelf:
 			else:
 				total_traj = 0
 				#Compute the total number of trajectories going trough state taking action
-				for key in prob[state_s_coord][action].keys():
+				for key in 	prob[state_s_coord][action].keys():
 					total_traj += prob[state_s_coord][action][key]
+				#total_traj = sum(list(prob[state_s_coord][action].values()))
+				#temp_list = np.array(list(prob[state_s_coord][action].keys()))*np.array(list(prob[state_s_coord][action].values()))/total_traj
 
 				for key in prob[state_s_coord][action].keys():
-					'''
-					key represents a reward
-					for each key, the value is the number of trajectories with that reward
-					'''
+	
+					#key represents a reward
+					#for each key, the value is the number of trajectories with that reward
+					
 					if key is not 'tot_trj':
 						temp_reward = key
 						temp_prob = prob[state_s_coord][action][key] / total_traj

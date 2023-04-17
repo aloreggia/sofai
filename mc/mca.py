@@ -50,6 +50,9 @@ class MCA:
 		self.thresholds_stat = []
 		self.thresholds_mask = []
 
+
+		self.decay = 0.9
+
 		self.time_stat = []
 		self.violations = []
 		self.action_reward = []
@@ -59,7 +62,7 @@ class MCA:
 		self.only_s2 = only_s2
 		self.max_time_s2 = float("-inf")
 
-		self.temperature = 1.0
+		self.temperature = 0.0
 
 		self.mixed = mixed
 		if self.mixed: 
@@ -118,6 +121,7 @@ class MCA:
 		temp_thresholds_stat = []
 		temp_thresholds_mask = []
 		self.time_left = self.fixed_time_left
+		#self.temperature = 0
 		
 		current_reward = 0 
 		trial = 0
@@ -146,6 +150,7 @@ class MCA:
 				temp_thresholds_stat = []
 				temp_thresholds_mask = []
 				self.time_left = self.fixed_time_left
+				#self.temperature = 0
 
 			#S1 computes an action based on previous experience
 			if not self.only_s2:
@@ -265,7 +270,9 @@ class MCA:
 
 							#if (action_thresholds[4]/action_thresholds[3] > pow((expected_time_s2/expected_cost_s1),(1-self.threshold3))):
 							delta_reward_norm = (action_thresholds[4] - action_thresholds[3])/max_diff_rew
-							total_cost = pow((1 + expected_cost_s2), (1 - self.threshold3)) - 1
+							total_cost = pow((1 + expected_cost_s2), (1 - self.threshold3)) - pow((1 + self.temperature), self.threshold3)
+							#TEST with only temperature
+							#total_cost = expected_cost_s2 - self.temperature
 
 							#delta_reward_norm = (action_thresholds[3] / action_thresholds[4])
 							#if (action_thresholds[3]<0) and (action_thresholds[4]>0):
@@ -409,7 +416,7 @@ class MCA:
 			time_builder.append(time_exp)
 
 
-		
+		#self.temperature = self.temperature * self.decay
 		return Trajectory(trajectory), True, trajectory_builder, time_builder, act_reward, temp_thresholds_stat, temp_thresholds_mask
 
 
@@ -482,12 +489,19 @@ class MCA:
 		
 		return Demonstration(list_tr, self.s1.policy)
 	
-	def reflect(self, p=0.2, verbose=False, max_length = 200, threshold_delta = -0.2):
+	def reflect(self, p=0, last=0, verbose=False, max_length = 200, threshold_delta = 0):
+		assert (p>0 or last >0)
 
-		#compute indexes for the portion of trajectories to be recomputed
-		final = len(self.trajectory_stat)
-		p =  min(1, abs(p))
-		initial = (int) (final - final * p)
+		if p >0:
+			#compute indexes for the portion of trajectories to be recomputed
+			final = len(self.trajectory_stat)
+			p =  min(1, abs(p))
+			initial = (int) (final - final * p)
+			
+		else:
+			final = len(self.trajectory_stat)
+			initial = final - last
+
 		print(f"{initial, final}")
 
 		new_trajectories = []
@@ -590,6 +604,8 @@ class MCA:
 			new_rewards.append(temp_reward)
 			new_times.append(temp_time)
 
+
+		print(f"improvements {improvements}")
 		values_new = []
 		values = []
 		delta = []
@@ -599,8 +615,8 @@ class MCA:
 				values_new.append((sum(r[1][i])))#/(len(r[1][i])*168)))
 			else:
 				values_new.append((sum(mca.action_reward[i])))#/sum(mca.time_stat[i])))'''
-			values.append(-sum(self.action_reward[i])*sum(self.time_stat[i]))
-			values_new.append(-sum(new_rewards[i])*sum(new_times[i]))
+			values.append(-sum(self.action_reward[i])*len(self.modelSelf.trajectories[i].transitions()))#*sum(self.time_stat[i]))
+			values_new.append(-sum(new_rewards[i-initial])*len(new_trajectories[i-initial].transitions()))#*sum(new_times[i-initial]))
 			#print(f"{values[-1],values_new[-1]}")
 			delta.append(math.log(values[-1]+epsilon,2) - math.log(values_new[-1]+epsilon,2))
 
@@ -618,7 +634,7 @@ class MCA:
 		origTraj = origTraj / sum(np.reshape(origTraj, (-1,)))
 
 		newtraj = np.zeros((size * size, 8, size * size)) + epsilon
-		for trajectory in new_trajectories:
+		for trajectory in compare_traj:
 			for transition in trajectory.transitions():
 				newtraj[tuple(transition)] += 1	
 		newtraj = newtraj / sum(np.reshape(newtraj, (-1,)))
