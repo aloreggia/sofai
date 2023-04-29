@@ -270,7 +270,8 @@ class MCA:
 
 							#if (action_thresholds[4]/action_thresholds[3] > pow((expected_time_s2/expected_cost_s1),(1-self.threshold3))):
 							delta_reward_norm = (action_thresholds[4] - action_thresholds[3])/max_diff_rew
-							total_cost = pow((1 + expected_cost_s2), (1 - self.threshold3)) - pow((1 + self.temperature), self.threshold3)
+							#total_cost = pow((1 + expected_cost_s2), (1 - self.threshold3)) - pow((1 + self.temperature), self.threshold3)
+							total_cost = expected_cost_s2 - self.temperature
 							#TEST with only temperature
 							#total_cost = expected_cost_s2 - self.temperature
 
@@ -510,6 +511,7 @@ class MCA:
 		improvements = []
 		modified = []
 
+		#Select original trajectories and check which one should be rebuilt
 		for trajectory_index in range(initial, final):
 			if verbose: print(f"trajectory_index {trajectory_index}")
 			#check if any action of the trajectory was computed by S1
@@ -610,6 +612,8 @@ class MCA:
 		values = []
 		delta = []
 		epsilon = 1E-9
+
+		#Evaluate new trajectories
 		for i in range(initial, initial+len(new_rewards)):
 			'''if r[3][i]:
 				values_new.append((sum(r[1][i])))#/(len(r[1][i])*168)))
@@ -618,9 +622,9 @@ class MCA:
 			values.append(-sum(self.action_reward[i])*len(self.modelSelf.trajectories[i].transitions()))#*sum(self.time_stat[i]))
 			values_new.append(-sum(new_rewards[i-initial])*len(new_trajectories[i-initial].transitions()))#*sum(new_times[i-initial]))
 			#print(f"{values[-1],values_new[-1]}")
-			delta.append(math.log(values[-1]+epsilon,2) - math.log(values_new[-1]+epsilon,2))
+			#delta.append(math.log(values[-1]+epsilon,2) - math.log(values_new[-1]+epsilon,2))
 
-		compare_traj = np.array(self.modelSelf.trajectories[initial:final])[np.where(np.array(delta)< threshold_delta)[0]]
+		'''compare_traj = np.array(self.modelSelf.trajectories[initial:final])[np.where(np.array(delta)< threshold_delta)[0]]
 		compare_traj = np.concatenate((np.array(new_trajectories)[np.where(np.array(delta)>= threshold_delta)[0]], compare_traj), axis=0)
 
 
@@ -639,8 +643,15 @@ class MCA:
 				newtraj[tuple(transition)] += 1	
 		newtraj = newtraj / sum(np.reshape(newtraj, (-1,)))
 
-		self.temperature = distance.jensenshannon(np.reshape(newtraj, (-1,)),np.reshape(origTraj, (-1,)))
+		self.temperature = distance.jensenshannon(np.reshape(newtraj, (-1,)),np.reshape(origTraj, (-1,)))'''
 
+		values = np.array(values)
+		values_new = np.array(values_new)
+		denominator = sum(abs(np.array(values) - np.array(values_new)))
+		if verbose: print(f"{sum(values - values_new)} / {denominator}")
+		if denominator == 0: self.temperature = 0
+		else: self.temperature = sum(values - values_new) / denominator
+		if verbose: print(f"self.temperature: {self.temperature}")
 		return new_trajectories, new_rewards, new_times, improvements, modified
 
 					
