@@ -25,7 +25,10 @@ from mc.system1 import *
 from mc.system2 import *
 from mc.mca import *
 
+np.seterr(divide='ignore', invalid='ignore')
+
 def compute_mean(target = None, demo = None, constraints = None, number = None, n_trajectories=None):
+    np.seterr(divide='ignore', invalid='ignore')
 
     df = pd.DataFrame()
 

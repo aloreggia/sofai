@@ -171,24 +171,35 @@ class MCA:
 				w = self.w
 
 				action_thresholds[0] = self.modelSelf.getNTrajectories(state)
-				#print(f"state {state} \t current_reward:{current_reward} \t expected_avg_reward: {expected_avg_reward}")
-				if current_reward>=0 and expected_avg_reward > 0:
-					action_thresholds[1] = current_reward / expected_avg_reward
-				elif current_reward<=0 and expected_avg_reward < 0:
-					action_thresholds[1] = expected_avg_reward / current_reward  
-				elif current_reward>=0 and expected_avg_reward < 0:
-					action_thresholds[1] = float("+inf")
-				elif current_reward<=0 and expected_avg_reward > 0:
-					action_thresholds[1] = float("-inf")
 
+				'''if not self.only_s2:
+					print(f"self.only_s2:{self.only_s2}")
+					print(f"self.threshold1:{self.threshold1} \t self.threshold2:{self.threshold2} \t self.threshold3:{self.threshold3} \t self.threshold4:{self.threshold4}")
+					print(f"action_thresholds[0] {action_thresholds[0]} \t self.threshold1:{self.threshold1}")
+					print(f"state {state} \t current_reward:{current_reward} \t expected_avg_reward: {expected_avg_reward}")'''
+
+				if current_reward == 0:
+					action_thresholds[1] = 0
+				elif current_reward>0 and expected_avg_reward > 0:
+					action_thresholds[1] = current_reward / expected_avg_reward
+				elif current_reward<0 and expected_avg_reward < 0:
+					action_thresholds[1] = expected_avg_reward / current_reward  
+				elif current_reward>0 and expected_avg_reward < 0:
+					action_thresholds[1] = float("+inf")
+				elif current_reward<0 and expected_avg_reward > 0:
+					action_thresholds[1] = float("-inf")
+				
 
 				if self.modelSelf.total_transitions_s1 >= self.threshold4:
 					action_thresholds[2] = min((1 - self.modelSelf.getM()), confidence)
 				else:
 					action_thresholds[2] = confidence
 
-				if not self.only_s2 and ((action_thresholds[0] <= self.threshold1) or (action_thresholds[1] < self.threshold2) or (action_thresholds[2] <= self.threshold3)):
+				'''print(f"Condizione1: {(action_thresholds[0] <= self.threshold1)}")
+				print(f"Condizione2: {(action_thresholds[1] < self.threshold2 * expected_avg_reward)}")'''
+				if not self.only_s2 and ((action_thresholds[0] <= self.threshold1) or (action_thresholds[1] < self.threshold2)): # or (action_thresholds[2] <= self.threshold3)):
 					engageS2 = False
+					#print(f"self.modelSelf.getM(): {self.modelSelf.getM()}")
 					#print(f"self.modelSelf.getM(): {self.modelSelf.getM()}")
 
 					if (action_thresholds[0] <= self.threshold1):
@@ -282,6 +293,9 @@ class MCA:
 							#total_cost = expected_cost_s2 / (self.threshold3)
 							
 							#print(f"{action_thresholds[4]} - {action_thresholds[3]}) / {max_diff_rew} > {expected_cost_s2}")
+							#print(f"Rew2: {action_thresholds[4]} - Rew: {action_thresholds[3]}) / {max_diff_rew} > Cost: {expected_cost_s2} -  Temperature :{self.temperature}")
+							#print(f"{action_thresholds[4] - action_thresholds[3]} / {max_diff_rew} > {expected_cost_s2 -  self.temperature}")
+							#print(f"Engage S2:{(action_thresholds[4] - action_thresholds[3] / max_diff_rew) > (expected_cost_s2 -  self.temperature)}\n\n")
 
 							if ( delta_reward_norm >= total_cost):	
 								action_thresholds_mask[6] = 1  		
@@ -607,7 +621,7 @@ class MCA:
 			new_times.append(temp_time)
 
 
-		print(f"improvements {improvements}")
+		if verbose: print(f"improvements {improvements}")
 		values_new = []
 		values = []
 		delta = []
@@ -651,6 +665,8 @@ class MCA:
 		if verbose: print(f"{sum(values - values_new)} / {denominator}")
 		if denominator == 0: self.temperature = 0
 		else: self.temperature = sum(values - values_new) / denominator
+		#Do not increase the cost if MC was performing better but leave it operating as usual
+		if self.temperature < 0 : self.temperature = 0
 		if verbose: print(f"self.temperature: {self.temperature}")
 		return new_trajectories, new_rewards, new_times, improvements, modified
 

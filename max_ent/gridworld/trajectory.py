@@ -178,7 +178,7 @@ def stochastic_policy_adapter(policy):
     return lambda state: np.random.choice([*range(policy.shape[1])], p=policy[state, :])
 
 
-def mdft_policy_adapter(nominal_q, constrained_q, w=None, delib_t=100):
+def mdft_policy_adapter(nominal_q, constrained_q, w=None, delib_t=10):
     def policy(state):
         r = nominal_q[state]
         c = constrained_q[state]
@@ -186,8 +186,8 @@ def mdft_policy_adapter(nominal_q, constrained_q, w=None, delib_t=100):
         S = hotaling_S(M, 0.01, 0.01, 2)
         p0 = np.zeros((M.shape[0], 1))
         mdft = MDFT(M, S, w, p0)
-        dist = get_time_based_dft_dist(mdft, 1, delib_t)
-        #dist = get_preference_based_dft_dist(mdft, 1, delib_t)
+        #dist = get_time_based_dft_dist(mdft, 1, delib_t)
+        dist = get_preference_based_dft_dist(mdft, 1, delib_t)
         #print(dist)
         return np.argmax(dist)
 
